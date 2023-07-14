@@ -6,7 +6,7 @@ const initialState = {
   logs: '',
   isRunning: false,
   config: {
-    git_tag: 'v0.1.0-testnet-sharingan-beta.7',
+    git_tag: 'v0.1.0-testnet-sharingan-beta.8.2',
   },
 };
 
