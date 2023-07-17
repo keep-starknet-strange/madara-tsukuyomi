@@ -70,6 +70,7 @@ const CloseButton = styled.div`
 
 export default function Settings({ onClose }: { onClose: any }) {
   const [releases, setReleases] = useState([]);
+  const [chainSpecs, setChainSpecs] = useState([]);
   const nodeConfig = useSelector(selectConfig);
   const dispatch = useDispatch();
 
@@ -112,6 +113,44 @@ export default function Settings({ onClose }: { onClose: any }) {
           <SettingHeading>Release</SettingHeading>
           <Select
             options={releases}
+            value={{ value: nodeConfig.git_tag, label: nodeConfig.git_tag }}
+            styles={{
+              control: (baseStyles) => ({
+                ...baseStyles,
+                width: '100%',
+                marginTop: '1rem',
+              }),
+            }}
+            className="react-select-container"
+            classNamePrefix="react-select"
+            theme={(theme) => ({
+              ...theme,
+              colors: {
+                ...theme.colors,
+                primary: '',
+                primary25: '',
+                primary50: '',
+                primary75: '',
+                neutral90: 'hsl(0, 0%, 100%)',
+                neutral80: 'hsl(0, 0%, 95%)',
+                neutral70: 'hsl(0, 0%, 90%)',
+                neutral60: 'hsl(0, 0%, 80%)',
+                neutral50: 'hsl(0, 0%, 70%)',
+                neutral40: 'hsl(0, 0%, 60%)',
+                neutral30: 'hsl(0, 0%, 50%)',
+                neutral20: 'hsl(0, 0%, 40%)',
+                neutral10: 'hsl(0, 0%, 30%)',
+                neutral5: 'hsl(0, 0%, 20%)',
+                neutral0: 'hsl(0, 0%, 10%)',
+              },
+            })}
+            onChange={(value: any) => configKeyUpdate('git_tag', value.value)}
+          />
+        </SettingContainer>
+        <SettingContainer>
+          <SettingHeading>Chain Spec</SettingHeading>
+          <Select
+            options={chainSpecs}
             value={{ value: nodeConfig.git_tag, label: nodeConfig.git_tag }}
             styles={{
               control: (baseStyles) => ({
