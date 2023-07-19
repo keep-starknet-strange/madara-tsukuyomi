@@ -18,6 +18,7 @@ const electronHandler = {
       releaseExists: (config: MadaraConfig) =>
         ipcRenderer.invoke('release-exists', config),
       childProcessInMemory: () => ipcRenderer.invoke('child-process-in-memory'),
+      sendTweet: () => ipcRenderer.invoke('send-tweet'),
     },
   },
 };

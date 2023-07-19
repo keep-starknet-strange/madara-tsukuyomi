@@ -3,6 +3,10 @@ import { BrowserWindow, app } from 'electron';
 import { download } from 'electron-dl';
 import fs from 'fs';
 import _ from 'lodash';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getApp } from 'firebase/app';
+import path from 'path';
+import sharp from 'sharp';
 
 const MADARA_APP_ROOT_FOLDER = '.madara-app';
 const RELEASES_FOLDER = `${app.getPath(
@@ -49,6 +53,12 @@ function getSetupFiles(config: MadaraConfig) {
       filename: url.split('/').pop(),
     };
   });
+}
+
+export async function getScreenShotWindow(win: BrowserWindow) {
+  const contents = win.webContents;
+  const nativeImage = await contents.capturePage();
+  await fs.promises.writeFile('image.png', nativeImage.toPNG());
 }
 
 const getNotDownloadedFiles = (config: MadaraConfig) => {
@@ -150,4 +160,34 @@ export async function stop() {
 
 export function childProcessInMemory(): boolean {
   return childProcess !== undefined;
+}
+
+export async function getFile() {
+  const filePath = '../../image.png'; // Replace with the actual path to your file
+  try {
+    const data = await fs.readFileSync(path.resolve(__dirname, filePath));
+    const fa = await sharp(data).rotate().resize(1048, 717).png().toBuffer();
+    return data ?? fa;
+  } catch (err) {
+    console.log({ err });
+  }
+}
+
+export async function uploadFilesToStorageFirebase(file: Buffer) {
+  const firebaseApp = getApp();
+
+  const storage = getStorage(firebaseApp);
+  // Create a storage reference from our storage service-
+  const storageRef = ref(storage, 'image.png');
+
+  // Create file metadata including the content type
+  /** @type {any} */
+  const metadata = {
+    contentType: 'image/png',
+  };
+  // 'file' comes from the Blob or File API
+  const snapshot = await uploadBytes(storageRef, file, metadata);
+
+  const res = await getDownloadURL(snapshot.ref);
+  return res;
 }
