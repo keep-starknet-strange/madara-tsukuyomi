@@ -12,8 +12,11 @@ import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
+import { initializeApp } from 'firebase/app';
 import * as Madara from './madara';
+
 import { resolveHtmlPath } from './util';
+import createShortLink from './firebase';
 
 class AppUpdater {
   constructor() {
@@ -39,6 +42,27 @@ ipcMain.handle('madara-setup', async (event, config: Madara.MadaraConfig) => {
 
 ipcMain.handle('release-exists', (event, config: Madara.MadaraConfig) => {
   return Madara.releaseExists(config);
+});
+
+ipcMain.handle('send-tweet', async () => {
+  await Madara.getScreenShotWindow(mainWindow as BrowserWindow);
+  const firebaseConfig = {
+    apiKey: 'AIzaSyC-u7ceUKNo8jyKw5I1YEazN4poQqhngbo',
+    authDomain: 'test-b5696.firebaseapp.com',
+    projectId: 'test-b5696',
+    storageBucket: 'test-b5696.appspot.com',
+    messagingSenderId: '627711477848',
+    appId: '1:627711477848:web:17917840281ff63c3ca22d',
+    measurementId: 'G-RL4PH93SQ3',
+  };
+
+  initializeApp(firebaseConfig);
+  const file = await Madara.getFile();
+  const shortURL = await Madara.uploadFilesToStorageFirebase(file);
+  const getShortenedLink = await createShortLink(shortURL);
+  shell.openExternal(
+    `https://twitter.com/intent/tweet?text=test%20this%20${getShortenedLink}`
+  );
 });
 
 ipcMain.handle('child-process-in-memory', (): boolean => {

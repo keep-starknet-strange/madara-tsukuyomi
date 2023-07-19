@@ -7,6 +7,8 @@ import { useAppDispatch } from 'renderer/utils/hooks';
 import MadaraLogo from '../../../assets/madara-logo.png';
 import Logs from './Logs';
 import Telemetry from './Telemetry';
+import TwitterIcon from '../../../assets/twitter.png';
+import Spinner from 'renderer/components/Spinner';
 
 const NavbarContainer = styled(motion.div)`
   background-color: black;
@@ -90,6 +92,11 @@ export default function Navigtion() {
   const [navbarIndex, setNavbarIndex] = useState<number>(0);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  const handleScreenshot = async () => {
+    await window.electron.ipcRenderer.madara.sendTweet();
+  };
+
   return (
     <NavbarContainer>
       <Navbar
@@ -112,6 +119,16 @@ export default function Navigtion() {
               {item.name}
             </NavbarItem>
           ))}
+          <NavbarItem onClick={() => handleScreenshot()} active={false}>
+            <img
+              src={TwitterIcon}
+              width={16}
+              height={16}
+              alt="twitter icon"
+              style={{ marginRight: 10 }}
+            />
+            Tweet
+          </NavbarItem>
           <NavbarItem
             onClick={() => {
               dispatch(stopNode());
