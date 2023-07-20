@@ -4,11 +4,11 @@ import { styled } from 'styled-components';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { stopNode } from 'renderer/features/nodeSlice';
 import { useAppDispatch } from 'renderer/utils/hooks';
+import Spinner from 'renderer/components/Spinner';
 import MadaraLogo from '../../../assets/madara-logo.png';
 import Logs from './Logs';
 import Telemetry from './Telemetry';
 import TwitterIcon from '../../../assets/twitter.png';
-import Spinner from 'renderer/components/Spinner';
 
 const NavbarContainer = styled(motion.div)`
   background-color: black;
@@ -123,7 +123,11 @@ export default function Navigtion() {
               {item.name}
             </NavbarItem>
           ))}
-          <NavbarItem onClick={() => handleScreenshot()} active={false}>
+          <NavbarItem
+            style={{ display: 'flex' }}
+            onClick={() => handleScreenshot()}
+            active={false}
+          >
             {showSpinner ? (
               <Spinner />
             ) : (
@@ -135,7 +139,7 @@ export default function Navigtion() {
                 style={{ marginRight: 10 }}
               />
             )}
-            Tweet
+            <div>Tweet</div>
           </NavbarItem>
           <NavbarItem
             onClick={() => {

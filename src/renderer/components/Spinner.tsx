@@ -4,15 +4,15 @@ const StyledContainer = styled.div`
   .lds-ring {
     display: inline-block;
     position: relative;
-    width: 12px;
-    height: 12px;
+    width: 24px;
+    height: 24px;
   }
   .lds-ring div {
     box-sizing: border-box;
     display: block;
     position: absolute;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     margin: 2px;
     border: 4px solid #9ca3af;
     border-radius: 50%;
