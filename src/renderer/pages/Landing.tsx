@@ -219,9 +219,13 @@ export default function Landing() {
       />
       <FormContainer onSubmit={handleFormSubmit} animate={formAnimationControl}>
         <Input
-          verticalPadding="0.7rem"
+          value={nodeConfig.name}
           placeholder="What name shall you be known by in this realm?"
-          style={{ fontSize: '1rem', width: '40%', textAlign: 'center' }}
+          style={{
+            fontSize: '1rem',
+            width: '40%',
+            textAlign: 'center',
+          }}
           onChange={handleNameChange}
         />
         <Button

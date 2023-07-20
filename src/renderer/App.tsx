@@ -63,7 +63,7 @@ export default function App() {
       dispatch(
         setConfig({
           ...nodeConfig,
-          git_tag: response.data.version_git_tag,
+          release: response.data.version_git_tag,
         })
       );
     })();

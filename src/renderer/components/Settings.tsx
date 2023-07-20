@@ -4,9 +4,14 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Select from 'react-select';
-import { selectConfig, setConfig } from 'renderer/features/nodeSlice';
+import {
+  configTypes,
+  selectConfig,
+  setConfig,
+} from 'renderer/features/nodeSlice';
 import { styled } from 'styled-components';
+import StyledSelect from './Dropdown';
+import Input from './Input';
 
 const SettingsContainer = styled(motion.div)`
   display: flex;
@@ -15,13 +20,19 @@ const SettingsContainer = styled(motion.div)`
   height: 95%;
   width: 30%;
   position: fixed;
-  right: 2rem;
+  right: 0rem;
   border-radius: 20px;
   z-index: 1;
   padding-left: 2rem;
   padding-right: 2rem;
   padding-top: 2rem;
   border: 1px solid #2d2d2d;
+`;
+
+const ContentContainer = styled.div`
+  height: 100%;
+  overflow-y: scroll;
+  margin-bottom: 2rem;
 `;
 
 const OpacityContainer = styled(motion.div)`
@@ -43,17 +54,7 @@ const MainHeading = styled.div`
 const SettingContainer = styled.div`
   display: flex;
   flex-direction: column;
-  .react-select__option {
-    color: white;
-  }
-  .react-select__option--is-selected {
-    color: #e62600;
-    background-color: rgba(230, 38, 0, 0.17);
-  }
-
-  .react-select__option--is-active {
-    background-color: transparent;
-  }
+  margin-top: 1.5rem;
 `;
 
 const SettingHeading = styled.div`
@@ -68,11 +69,40 @@ const CloseButton = styled.div`
   cursor: pointer;
 `;
 
+/*
+releases => dropdown
+chain spec => file path - can be asked to browse
+rpc-cors => null , all , custom list of origins
+rpc-external => true/false , try to give unsafe option here too
+rpc-methods => unsafe , safe , auto(default)
+port => input
+rpc_port => input
+name => input
+telemetry-url => add urls in 0->9 format with drag and drop
+bootnodes => show list of bootnode identifiers
+*/
 export default function Settings({ onClose }: { onClose: any }) {
   const [releases, setReleases] = useState([]);
   const [chainSpecs, setChainSpecs] = useState([]);
+
+  const RPCExternal = [
+    { value: 'true', label: 'true' },
+    { value: 'false', label: 'false' },
+  ];
+  const RPCMethods = [
+    { value: 'unsafe', label: 'unsafe' },
+    { value: 'safe', label: 'safe' },
+    { value: 'auto', label: 'auto' },
+  ];
+
   const nodeConfig = useSelector(selectConfig);
   const dispatch = useDispatch();
+
+  const configKeyUpdate = (key: configTypes, value: any) => {
+    const newConfig: any = { ...nodeConfig };
+    newConfig[key] = value;
+    dispatch(setConfig(newConfig));
+  };
 
   useEffect(() => {
     (async () => {
@@ -86,12 +116,6 @@ export default function Settings({ onClose }: { onClose: any }) {
       );
     })();
   }, []);
-
-  const configKeyUpdate = (key: string, value: any) => {
-    const newConfig: any = { ...nodeConfig };
-    newConfig[key] = value;
-    dispatch(setConfig(newConfig));
-  };
 
   return (
     <>
@@ -109,82 +133,141 @@ export default function Settings({ onClose }: { onClose: any }) {
           <FontAwesomeIcon icon={faClose} color="white" size="xl" />
         </CloseButton>
         <MainHeading>Settings</MainHeading>
-        <SettingContainer>
-          <SettingHeading>Release</SettingHeading>
-          <Select
-            options={releases}
-            value={{ value: nodeConfig.git_tag, label: nodeConfig.git_tag }}
-            styles={{
-              control: (baseStyles) => ({
-                ...baseStyles,
+
+        <ContentContainer>
+          <SettingContainer>
+            {/* Releases */}
+            <SettingHeading>Release</SettingHeading>
+            <StyledSelect
+              options={releases}
+              value={{
+                value: nodeConfig.release,
+                label: nodeConfig.release,
+              }}
+              onChange={(value: any) => configKeyUpdate('release', value.value)}
+            />
+          </SettingContainer>
+
+          {/* rpc-external */}
+          <SettingContainer>
+            <SettingHeading>Rpc External</SettingHeading>
+            <StyledSelect
+              options={RPCExternal}
+              value={{
+                value: nodeConfig.RPCExternal,
+                label: nodeConfig.RPCExternal,
+              }}
+              onChange={(value: any) =>
+                configKeyUpdate('RPCExternal', value.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* rpc-methods */}
+          <SettingContainer>
+            <SettingHeading>Rpc Method</SettingHeading>
+            <StyledSelect
+              options={RPCMethods}
+              value={{
+                value: nodeConfig.RPCMethods,
+                label: nodeConfig.RPCMethods,
+              }}
+              onChange={(value: any) =>
+                configKeyUpdate('RPCMethods', value.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* rpc-port */}
+          <SettingContainer>
+            <SettingHeading>Rpc Port</SettingHeading>
+            <Input
+              placeholder="Default Port Number is 9944"
+              style={{
+                fontSize: '1rem',
                 width: '100%',
+                textAlign: 'left',
                 marginTop: '1rem',
-              }),
-            }}
-            className="react-select-container"
-            classNamePrefix="react-select"
-            theme={(theme) => ({
-              ...theme,
-              colors: {
-                ...theme.colors,
-                primary: '',
-                primary25: '',
-                primary50: '',
-                primary75: '',
-                neutral90: 'hsl(0, 0%, 100%)',
-                neutral80: 'hsl(0, 0%, 95%)',
-                neutral70: 'hsl(0, 0%, 90%)',
-                neutral60: 'hsl(0, 0%, 80%)',
-                neutral50: 'hsl(0, 0%, 70%)',
-                neutral40: 'hsl(0, 0%, 60%)',
-                neutral30: 'hsl(0, 0%, 50%)',
-                neutral20: 'hsl(0, 0%, 40%)',
-                neutral10: 'hsl(0, 0%, 30%)',
-                neutral5: 'hsl(0, 0%, 20%)',
-                neutral0: 'hsl(0, 0%, 10%)',
-              },
-            })}
-            onChange={(value: any) => configKeyUpdate('git_tag', value.value)}
-          />
-        </SettingContainer>
-        <SettingContainer>
-          <SettingHeading>Chain Spec</SettingHeading>
-          <Select
-            options={chainSpecs}
-            value={{ value: nodeConfig.git_tag, label: nodeConfig.git_tag }}
-            styles={{
-              control: (baseStyles) => ({
-                ...baseStyles,
+              }}
+              value={nodeConfig.RPCPort}
+              onChange={(event: any) =>
+                configKeyUpdate('RPCPort', event.target.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* port */}
+          <SettingContainer>
+            <SettingHeading>Port</SettingHeading>
+            <Input
+              value={nodeConfig.port}
+              placeholder="Default Port Number is 10333"
+              style={{
+                fontSize: '1rem',
                 width: '100%',
+                textAlign: 'left',
                 marginTop: '1rem',
-              }),
-            }}
-            className="react-select-container"
-            classNamePrefix="react-select"
-            theme={(theme) => ({
-              ...theme,
-              colors: {
-                ...theme.colors,
-                primary: '',
-                primary25: '',
-                primary50: '',
-                primary75: '',
-                neutral90: 'hsl(0, 0%, 100%)',
-                neutral80: 'hsl(0, 0%, 95%)',
-                neutral70: 'hsl(0, 0%, 90%)',
-                neutral60: 'hsl(0, 0%, 80%)',
-                neutral50: 'hsl(0, 0%, 70%)',
-                neutral40: 'hsl(0, 0%, 60%)',
-                neutral30: 'hsl(0, 0%, 50%)',
-                neutral20: 'hsl(0, 0%, 40%)',
-                neutral10: 'hsl(0, 0%, 30%)',
-                neutral5: 'hsl(0, 0%, 20%)',
-                neutral0: 'hsl(0, 0%, 10%)',
-              },
-            })}
-            onChange={(value: any) => configKeyUpdate('git_tag', value.value)}
-          />
-        </SettingContainer>
+              }}
+              onChange={(event: any) =>
+                configKeyUpdate('port', event.target.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* rpc-cors */}
+          <SettingContainer>
+            <SettingHeading>Rpc Cors</SettingHeading>
+            <Input
+              placeholder="Enter CORS rules"
+              style={{
+                fontSize: '1rem',
+                width: '100%',
+                textAlign: 'left',
+                marginTop: '1rem',
+              }}
+              value={nodeConfig.RPCCors}
+              onChange={(event: any) =>
+                configKeyUpdate('RPCCors', event.target.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* bootnodes */}
+          <SettingContainer>
+            <SettingHeading>Bootnodes</SettingHeading>
+            <Input
+              value={nodeConfig.bootnodes}
+              placeholder="Enter bootnodes seperated by space"
+              style={{
+                fontSize: '1rem',
+                width: '100%',
+                textAlign: 'left',
+                marginTop: '1rem',
+              }}
+              onChange={(event: any) =>
+                configKeyUpdate('bootnodes', event.target.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* telemetry-url */}
+          <SettingContainer>
+            <SettingHeading>Telemetry Url</SettingHeading>
+            <Input
+              value={nodeConfig.telemetryURL}
+              placeholder="Enter telemetry url with verbose level"
+              style={{
+                fontSize: '1rem',
+                width: '100%',
+                textAlign: 'left',
+                marginTop: '1rem',
+              }}
+              onChange={(event: any) =>
+                configKeyUpdate('telemetryURL', event.target.value)
+              }
+            />
+          </SettingContainer>
+        </ContentContainer>
       </SettingsContainer>
     </>
   );
