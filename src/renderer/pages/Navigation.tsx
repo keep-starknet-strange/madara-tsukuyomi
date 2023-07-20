@@ -165,6 +165,9 @@ export default function Navigtion() {
             .filter(([, isRunning]) => isRunning)
             .map(([appId]) => {
               const app = APPS_CONFIG.apps.filter((a) => a.id === appId)[0];
+              if (!app.showFrontend) {
+                return <div />;
+              }
               return (
                 <NavbarItem
                   onClick={() => {
@@ -210,7 +213,6 @@ export default function Navigtion() {
               onClick={() => {
                 dispatch(startNode());
               }}
-              style={{ marginTop: 'auto' }}
               active={false}
             >
               ▶️ Resume Node
