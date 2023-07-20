@@ -2,11 +2,32 @@ import { createSlice } from '@reduxjs/toolkit';
 import { MadaraConfig } from 'main/madara';
 import { getStore } from 'renderer/store/storeRegistry';
 
+export type configTypes =
+  | 'RPCCors'
+  | 'RPCExternal'
+  | 'RPCMethods'
+  | 'port'
+  | 'RPCPort'
+  | 'telemetryURL'
+  | 'bootnodes'
+  | 'testnet'
+  | 'name'
+  | 'release';
+
 const initialState = {
   logs: '',
   isRunning: false,
   config: {
-    git_tag: 'v0.1.0-testnet-sharingan-beta.8.2',
+    RPCCors: '',
+    RPCExternal: 'false',
+    RPCMethods: 'Auto',
+    port: '10333',
+    RPCPort: '9944',
+    telemetryURL: 'wss://telemetry.madara.zone/submit 0',
+    bootnodes: '',
+    testnet: 'sharingan',
+    name: '',
+    release: 'v0.1.0-testnet-sharingan-beta.8.2',
   },
 };
 

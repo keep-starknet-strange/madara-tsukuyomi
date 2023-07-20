@@ -22,8 +22,16 @@ const GIT_RELEASE_BASE_PATH =
   'https://raw.githubusercontent.com/apoorvsadana/madara-app/main/config/releases';
 
 export type MadaraConfig = {
-  git_tag: string;
   name?: string;
+  RPCCors: string;
+  RPCExternal: string;
+  RPCMethods: string;
+  port: string;
+  RPCPort: string;
+  telemetryURL: string;
+  bootnodes: string;
+  testnet: string;
+  release: string;
 };
 
 const SETUP_FILES = [
@@ -38,7 +46,7 @@ const SETUP_FILES = [
     showProgress: false,
   },
   {
-    url: `${GIT_RELEASE_BASE_PATH}/<%= git_tag %>`, // git_tag is replaced by the config
+    url: `${GIT_RELEASE_BASE_PATH}/<%= release %>`, // release is replaced by the config
     directory: RELEASES_FOLDER,
     showProgress: true,
   },
@@ -108,6 +116,19 @@ export async function setup(window: BrowserWindow, config: MadaraConfig) {
   }
 }
 
+const keyToStateMap = {
+  RPCCors: '--rpc-cors',
+  RPCExternal: '--rpc-external',
+  RPCMethods: '--rpc-methods',
+  port: '--port',
+  RPCPort: '--rpc-port',
+  telemetryURL: '--telemetry-url',
+  bootnodes: '--bootnodes',
+  testnet: '--testnet',
+  name: '--name',
+  release: '--release',
+};
+
 // this is a global variable that stores the latest childProcess
 let childProcess: ChildProcessWithoutNullStreams | undefined;
 export async function start(window: BrowserWindow, config: MadaraConfig) {
@@ -116,18 +137,25 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  const args = [
-    '--testnet',
-    'sharingan',
-    '--telemetry-url',
-    'wss://telemetry.madara.zone/submit 0',
-  ];
-  if (config.name) {
-    args.push('--name');
-    args.push(config.name);
-  }
+  const args = [];
+  Object.keys(config).forEach((eachKey) => {
+    if (config[eachKey].length > 0 && config[eachKey] !== undefined) {
+      if (eachKey === 'RPCExternal') {
+        if (config[eachKey] === 'true') {
+          args.push(keyToStateMap[eachKey].trim);
+        }
+      } else if (eachKey === 'RPCMethods' || eachKey === 'RPCCors') {
+        if (config[eachKey].length > 0) {
+          args.push(`${keyToStateMap[eachKey]}=${config[eachKey].trim()}`);
+        }
+      } else if (eachKey !== 'release') {
+        args.push(keyToStateMap[eachKey]);
+        args.push(config[eachKey].trim());
+      }
+    }
+  });
 
-  const execPath = `${RELEASES_FOLDER}/${config.git_tag}`;
+  const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath
   if (process.platform !== 'win32') {
     execSync(`chmod +x ${execPath}`);
@@ -169,7 +197,7 @@ export async function getFile() {
     const fa = await sharp(data).rotate().resize(1048, 717).png().toBuffer();
     return data ?? fa;
   } catch (err) {
-    console.log({ err });
+    console.error(err);
   }
 }
 

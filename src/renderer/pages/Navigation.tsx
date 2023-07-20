@@ -90,11 +90,15 @@ const NAVBAR_ITEMS: NavbarItemType[] = [
 
 export default function Navigtion() {
   const [navbarIndex, setNavbarIndex] = useState<number>(0);
+  const [showSpinner, setShowSpinner] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const handleScreenshot = async () => {
+    setShowSpinner(true);
     await window.electron.ipcRenderer.madara.sendTweet();
+    setShowSpinner(false);
   };
 
   return (
@@ -120,13 +124,17 @@ export default function Navigtion() {
             </NavbarItem>
           ))}
           <NavbarItem onClick={() => handleScreenshot()} active={false}>
-            <img
-              src={TwitterIcon}
-              width={16}
-              height={16}
-              alt="twitter icon"
-              style={{ marginRight: 10 }}
-            />
+            {showSpinner ? (
+              <Spinner />
+            ) : (
+              <img
+                src={TwitterIcon}
+                width={16}
+                height={16}
+                alt="twitter icon"
+                style={{ marginRight: 10 }}
+              />
+            )}
             Tweet
           </NavbarItem>
           <NavbarItem
