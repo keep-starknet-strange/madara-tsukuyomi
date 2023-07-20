@@ -119,7 +119,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  const args = ['--base-path', CHAIN_DB_FOLDER];
+  let args = ['--base-path', CHAIN_DB_FOLDER];
   Object.keys(config).forEach((eachKey) => {
     // get value from node config input by user
     const value = config[eachKey as keyof MadaraConfig];
@@ -150,6 +150,14 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
       args.push(value);
     }
   });
+
+  if (process.env.NODE_ENV === 'development') {
+    args = [...args, CHAIN_DB_FOLDER];
+  }
+  if (config.name) {
+    args.push('--name');
+    args.push(config.name);
+  }
 
   const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath
