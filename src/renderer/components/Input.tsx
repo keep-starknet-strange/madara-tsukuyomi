@@ -24,16 +24,16 @@ export default function Input({
   placeholder?: string;
   style?: CSSProperties;
   onChange: any;
-  value: any;
+  value: string;
 }) {
   return (
     <InputContainer
-      value={value}
       style={{
         ...style,
       }}
       placeholder={placeholder}
       onChange={onChange}
+      value={value}
     />
   );
 }

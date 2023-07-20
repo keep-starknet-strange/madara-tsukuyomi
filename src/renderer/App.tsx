@@ -1,45 +1,30 @@
-import React from 'react';
-import {
-  MemoryRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom';
+/* eslint-disable react-hooks/exhaustive-deps */
+import axios from 'axios';
+import { useEffect } from 'react';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import sharinganConfig from '../../config/sharingan.json';
 import './App.css';
+import {
+  selectConfig,
+  selectSetupComplete,
+  setConfig,
+  setIsRunning,
+} from './features/nodeSlice';
 import Landing from './pages/Landing';
 import Navigtion from './pages/Navigation';
 import store from './store/store';
 import { register } from './store/storeRegistry';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import {
-  selectConfig,
-  selectIsRunning,
-  setConfig,
-  setIsRunning,
-} from './features/nodeSlice';
-import { useDispatch } from 'react-redux';
-import axios from 'axios';
+import { useAppDispatch, useAppSelector } from './utils/hooks';
 
 // putting the store in registry so that we can use it outside of react components
 register(store);
 
 export default function App() {
   const location = useLocation();
+  const nodeConfig = useAppSelector(selectConfig);
+  const dispatch = useAppDispatch();
+  const isSetupComplete = useAppSelector(selectSetupComplete);
   const navigate = useNavigate();
-  const isNodeRunning = useSelector(selectIsRunning);
-  const nodeConfig = useSelector(selectConfig);
-  const dispatch = useDispatch();
-
-  // navigate every time isNodeRunning changes
-  useEffect(() => {
-    if (isNodeRunning) {
-      navigate('/navigation/logs');
-    } else {
-      navigate('/');
-    }
-  }, [isNodeRunning]);
 
   // check if the node is running and set the screen
   useEffect(() => {
@@ -54,16 +39,29 @@ export default function App() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (isSetupComplete) {
+      navigate('/navigation/logs');
+    }
+  }, []);
+
   // get the config and set it in redux
   useEffect(() => {
     (async () => {
-      const response = await axios.get(
-        'https://raw.githubusercontent.com/apoorvsadana/madara-app/main/config/sharingan.json'
-      );
+      let gitTag;
+      if (process.env.NODE_ENV === 'development') {
+        gitTag = sharinganConfig.version_git_tag;
+      } else {
+        const response = await axios.get(
+          'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/sharingan.json'
+        );
+        gitTag = response.data.version_git_tag;
+      }
+
       dispatch(
         setConfig({
           ...nodeConfig,
-          release: response.data.version_git_tag,
+          release: gitTag,
         })
       );
     })();

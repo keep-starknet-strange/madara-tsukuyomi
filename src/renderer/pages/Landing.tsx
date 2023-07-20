@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { styled } from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSliders } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Progress } from 'electron-dl';
 import {
   AnimatePresence,
   motion,
   useAnimate,
   useAnimation,
 } from 'framer-motion';
-import { Progress } from 'electron-dl';
-import { MadaraConfig } from 'main/madara';
-import SharinganEye from '../components/SharinganEye';
-import Input from '../components/Input';
-import Button from '../components/Button';
-import InfiniteBarLoader from '../components/InfiniteBarLoader';
-import { useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import Settings from 'renderer/components/Settings';
 import {
   selectConfig,
   setConfig,
   startNode,
 } from 'renderer/features/nodeSlice';
-import { useNavigate } from 'react-router-dom';
-import Settings from 'renderer/components/Settings';
-import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'renderer/utils/hooks';
+import { styled } from 'styled-components';
+import Button from '../components/Button';
+import InfiniteBarLoader from '../components/InfiniteBarLoader';
+import Input from '../components/Input';
+import SharinganEye from '../components/SharinganEye';
 
 const LandingContainer = styled(motion.div)`
   background-color: black;
@@ -178,6 +176,7 @@ export default function Landing() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     dispatch(startNode());
+    navigate('/navigation/logs');
   };
 
   const handleNameChange = (e: any) => {
@@ -227,6 +226,7 @@ export default function Landing() {
             textAlign: 'center',
           }}
           onChange={handleNameChange}
+          value={nodeConfig.name}
         />
         <Button
           verticalPadding="0.7rem"
@@ -237,6 +237,7 @@ export default function Landing() {
             textAlign: 'center',
             marginTop: '1rem',
           }}
+          onClick={handleFormSubmit}
         />
       </FormContainer>
       <InfiniteLoaderContainer
