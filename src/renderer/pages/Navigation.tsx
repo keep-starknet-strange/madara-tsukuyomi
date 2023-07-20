@@ -1,12 +1,23 @@
-import React, { ReactNode, useState } from 'react';
 import { motion } from 'framer-motion';
-import { styled } from 'styled-components';
+import _ from 'lodash';
+import { ReactNode, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { stopNode } from 'renderer/features/nodeSlice';
-import { useAppDispatch } from 'renderer/utils/hooks';
+import { selectRunningApps } from 'renderer/features/appsSlice';
+import {
+  deleteNode,
+  selectIsRunning,
+  setSetupComplete,
+  startNode,
+  stopNode,
+} from 'renderer/features/nodeSlice';
+import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
+import { styled } from 'styled-components';
 import MadaraLogo from '../../../assets/madara-logo.png';
+import APPS_CONFIG from '../../../config/apps';
+import Apps from './Apps';
 import Logs from './Logs';
 import Telemetry from './Telemetry';
+import AppViewer from './AppViewer';
 
 const NavbarContainer = styled(motion.div)`
   background-color: black;
@@ -66,30 +77,57 @@ const NavbarItem = styled.div<{ active: boolean }>`
   border-radius: 4px;
   margin-bottom: 0.5rem;
   cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const NavbarImage = styled.img`
+  width: 1.2rem;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+`;
+
+const AppSeperator = styled.hr`
+  border: 0.2px solid #282828;
+  width: 100%;
 `;
 
 type NavbarItemType = {
+  id: string;
   name: string;
   path: string;
   component: ReactNode;
 };
 const NAVBAR_ITEMS: NavbarItemType[] = [
   {
+    id: '85c147bd-32c6-433b-97f2-009167aab78b',
     name: '🔍 Logs',
     path: 'logs',
     component: <Logs />,
   },
   {
+    id: '7792b715-771b-47c2-a5c8-3c15cae16a3d',
     name: '📊 Telemetry',
     path: 'telemetery',
     component: <Telemetry />,
   },
+  {
+    id: 'fa1d9821-6fd4-46de-99ea-0f0fc967780c',
+    name: '📱 Apps',
+    path: 'apps',
+    component: <Apps />,
+  },
 ];
 
 export default function Navigtion() {
-  const [navbarIndex, setNavbarIndex] = useState<number>(0);
+  const [navbarActiveId, setNavbarActiveId] = useState<string>(
+    NAVBAR_ITEMS[0].id
+  );
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const isNodeRunning = useAppSelector(selectIsRunning);
+  const runningApps = useAppSelector(selectRunningApps);
   return (
     <NavbarContainer>
       <Navbar
@@ -101,25 +139,65 @@ export default function Navigtion() {
           Madara
         </NavbarHeading>
         <NavbarItemsContainer>
-          {NAVBAR_ITEMS.map((item, index) => (
+          {NAVBAR_ITEMS.map((item) => (
             <NavbarItem
               onClick={() => {
                 navigate(`./${item.path}`);
-                setNavbarIndex(index);
+                setNavbarActiveId(item.id);
               }}
-              active={navbarIndex === index}
+              active={navbarActiveId === item.id}
             >
               {item.name}
             </NavbarItem>
           ))}
+          {!_.isEmpty(runningApps) && <AppSeperator />}
+          {Object.entries(runningApps)
+            .filter(([, isRunning]) => isRunning)
+            .map(([appId]) => {
+              const app = APPS_CONFIG.apps.filter((a) => a.id === appId)[0];
+              return (
+                <NavbarItem
+                  onClick={() => {
+                    navigate(`./apps/${appId}`);
+                    setNavbarActiveId(appId);
+                  }}
+                  active={navbarActiveId === appId}
+                >
+                  <NavbarImage src={app.logoUrl} />
+                  {app.appName}
+                </NavbarItem>
+              );
+            })}
+          {isNodeRunning ? (
+            <NavbarItem
+              onClick={() => {
+                dispatch(stopNode());
+              }}
+              style={{ marginTop: 'auto' }}
+              active={false}
+            >
+              🔌 Stop Node
+            </NavbarItem>
+          ) : (
+            <NavbarItem
+              onClick={() => {
+                dispatch(startNode());
+              }}
+              style={{ marginTop: 'auto' }}
+              active={false}
+            >
+              ▶️ Resume Node
+            </NavbarItem>
+          )}
           <NavbarItem
             onClick={() => {
-              dispatch(stopNode());
+              dispatch(deleteNode());
+              dispatch(setSetupComplete(false));
+              navigate('/');
             }}
-            style={{ marginTop: 'auto' }}
             active={false}
           >
-            🔌 Stop Node
+            🗑️ Delete node
           </NavbarItem>
         </NavbarItemsContainer>
       </Navbar>
@@ -128,6 +206,7 @@ export default function Navigtion() {
           {NAVBAR_ITEMS.map((item) => (
             <Route path={`/${item.path}`} element={item.component} />
           ))}
+          <Route path="/apps/:appId" element={<AppViewer />} />
         </Routes>
       </ContentContainer>
     </NavbarContainer>

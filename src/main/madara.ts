@@ -3,19 +3,18 @@ import { BrowserWindow, app } from 'electron';
 import { download } from 'electron-dl';
 import fs from 'fs';
 import _ from 'lodash';
+import { MADARA_APP_PATH } from './constants';
 
-const MADARA_APP_ROOT_FOLDER = '.madara-app';
-const RELEASES_FOLDER = `${app.getPath(
-  'home'
-)}/${MADARA_APP_ROOT_FOLDER}/releases`;
+const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
 
 // we download the chain specs for now because of an issue in the binaries
 // we can skip this step once this is fixed -  https://github.com/keep-starknet-strange/madara/issues/728
 const CHAIN_SPECS_FOLDER = `${app.getPath('home')}/.madara/chain-specs`;
+const CHAIN_DB_FOLDER = `${MADARA_APP_PATH}/data`;
 
 // TODO: update this once we have binary releases on Madara
 const GIT_RELEASE_BASE_PATH =
-  'https://raw.githubusercontent.com/apoorvsadana/madara-app/main/config/releases';
+  'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/releases';
 
 export type MadaraConfig = {
   git_tag: string;
@@ -106,12 +105,15 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  const args = [
+  let args = [
     '--testnet',
     'sharingan',
     '--telemetry-url',
     'wss://telemetry.madara.zone/submit 0',
   ];
+  if (process.env.NODE_ENV === 'development') {
+    args = ['--dev', '--base-path', CHAIN_DB_FOLDER];
+  }
   if (config.name) {
     args.push('--name');
     args.push(config.name);
@@ -146,6 +148,13 @@ export async function stop() {
   }
   childProcess.kill();
   childProcess = undefined;
+}
+
+export async function deleteNode() {
+  // stop the child process
+  await stop();
+  // delete the releases folder
+  fs.rmdirSync(CHAIN_DB_FOLDER, { recursive: true });
 }
 
 export function childProcessInMemory(): boolean {

@@ -13,6 +13,7 @@ import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import * as Madara from './madara';
+import * as MadaraApp from './madara-app';
 import { resolveHtmlPath } from './util';
 
 class AppUpdater {
@@ -33,6 +34,10 @@ ipcMain.handle('madara-stop', async () => {
   await Madara.stop();
 });
 
+ipcMain.handle('madara-delete', async () => {
+  await Madara.deleteNode();
+});
+
 ipcMain.handle('madara-setup', async (event, config: Madara.MadaraConfig) => {
   await Madara.setup(mainWindow as BrowserWindow, config);
 });
@@ -43,6 +48,22 @@ ipcMain.handle('release-exists', (event, config: Madara.MadaraConfig) => {
 
 ipcMain.handle('child-process-in-memory', (): boolean => {
   return Madara.childProcessInMemory();
+});
+
+ipcMain.handle('madara-app-download', async (event, appId: string) => {
+  await MadaraApp.downloadApp(mainWindow as BrowserWindow, appId);
+});
+
+ipcMain.handle('madara-installed-apps', () => {
+  return MadaraApp.getInstalledApps();
+});
+
+ipcMain.handle('madara-app-start', (event, appId: string) => {
+  return MadaraApp.startApp(mainWindow as BrowserWindow, appId);
+});
+
+ipcMain.handle('madara-app-stop', (event, appId: string) => {
+  return MadaraApp.stopApp(mainWindow as BrowserWindow, appId);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -95,6 +116,7 @@ const createWindow = async () => {
     },
   });
 
+  console.log('this is the resolved - ', resolveHtmlPath('index.html'));
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -106,9 +128,25 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+
+    // madara explorer ha some custom x-frame-options header that prevents it from being
+    // loaded, this code ensures the iframe loads
+    mainWindow.webContents.session.webRequest.onHeadersReceived(
+      { urls: ['*://*/*'] },
+      (details, callback) => {
+        if (details && details.responseHeaders) {
+          if (details.responseHeaders['X-Frame-Options']) {
+            delete details.responseHeaders['X-Frame-Options'];
+          } else if (details.responseHeaders['x-frame-options']) {
+            delete details.responseHeaders['x-frame-options'];
+          }
+        }
+        callback({ cancel: false, responseHeaders: details.responseHeaders });
+      }
+    );
   });
 
-  mainWindow.on('closed', () => {
+  mainWindow.on('closed', async () => {
     if (Madara.childProcessInMemory()) {
       Madara.stop();
     }

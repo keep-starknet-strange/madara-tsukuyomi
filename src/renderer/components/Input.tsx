@@ -18,12 +18,14 @@ export default function Input({
   placeholder = '',
   style = {},
   onChange,
+  value,
 }: {
   verticalPadding?: string;
   horizontalPadding?: string;
   placeholder?: string;
   style?: object;
   onChange: any;
+  value: string;
 }) {
   return (
     <InputContainer
@@ -36,6 +38,7 @@ export default function Input({
       }}
       placeholder={placeholder}
       onChange={onChange}
+      value={value}
     />
   );
 }

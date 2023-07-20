@@ -8,10 +8,11 @@ const initialState = {
   config: {
     git_tag: 'v0.1.0-testnet-sharingan-beta.8.2',
   },
+  setupComplete: false,
 };
 
 export const nodeSlice = createSlice({
-  name: 'terminal',
+  name: 'node',
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
@@ -27,14 +28,26 @@ export const nodeSlice = createSlice({
     setConfig: (state, data) => {
       state.config = data.payload;
     },
+    setSetupComplete: (state, data) => {
+      state.setupComplete = data.payload;
+    },
   },
 });
 
-export const { setIsRunning, appendLogs, setConfig, setLogs } =
-  nodeSlice.actions;
+export const {
+  setIsRunning,
+  appendLogs,
+  setConfig,
+  setLogs,
+  setSetupComplete,
+} = nodeSlice.actions;
 
 export const selectIsRunning = (state: any): boolean => {
   return state.node.isRunning;
+};
+
+export const selectSetupComplete = (state: any): boolean => {
+  return state.node.setupComplete;
 };
 
 export const selectLogs = (state: any): string => {
@@ -46,6 +59,10 @@ export const selectConfig = (state: any): MadaraConfig => {
 };
 
 export const startNode = () => async (dispatch: any, getState: any) => {
+  const isSetupComplete = selectSetupComplete(getState());
+  if (!isSetupComplete) {
+    dispatch(setSetupComplete(true));
+  }
   const isRunning = selectIsRunning(getState());
   if (isRunning) {
     return;
@@ -63,6 +80,16 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
   dispatch(setIsRunning(false));
 };
 
+export const deleteNode = () => async (dispatch: any, getState: any) => {
+  const isRunning = selectIsRunning(getState());
+  if (!isRunning) {
+    return;
+  }
+  await window.electron.ipcRenderer.madara.delete();
+  dispatch(setIsRunning(false));
+  dispatch(setLogs(''));
+};
+
 // set up listener to get all log events
 window.electron.ipcRenderer.madara.onNodeLogs((event: any, data: string) => {
   getStore().dispatch(appendLogs(data));
@@ -71,7 +98,12 @@ window.electron.ipcRenderer.madara.onNodeLogs((event: any, data: string) => {
 // set up listener to set isRunning to false when node stops
 window.electron.ipcRenderer.madara.onNodeStop(() => {
   getStore().dispatch(setIsRunning(false));
-  getStore().dispatch(setLogs(''));
+  // get local data time in format YYYY-MM-DD HH:MM:SS
+  const date = new Date()
+    .toLocaleString()
+    .replaceAll(',', '')
+    .replaceAll('/', '-');
+  getStore().dispatch(appendLogs(`${date} ********** NODE STOPPED **********`));
 });
 
 export default nodeSlice.reducer;
