@@ -65,7 +65,7 @@ ipcMain.handle('send-tweet', async () => {
   const shortURL = await Madara.uploadFilesToStorageFirebase(file);
   const getShortenedLink = await createShortLink(shortURL);
   shell.openExternal(
-    `https://twitter.com/intent/tweet?text=test%20this%20${getShortenedLink}`
+    `https://twitter.com/intent/tweet?text=Just%20ran%20my%20blazingly%20fast%20%40MadaraStarknet%20node%20in%20less%20than%20a%20minute%20%E2%9A%A1.%20Check%20out%20all%20the%20Sharingan%20nodes%20here%20-%20${getShortenedLink}`
   );
 });
 

@@ -173,6 +173,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
   childProcess.on('close', () => {
     try {
       window.webContents.send('node-stop');
+      childProcess = undefined;
     } catch (err) {
       // if the user has closed the window then this emit won't work and it throws an error dialog, hence try catch
     }
