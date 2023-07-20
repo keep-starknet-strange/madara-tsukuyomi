@@ -1,6 +1,10 @@
 import { styled } from 'styled-components';
 
 const StyledContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 2px;
   .lds-ring {
     display: inline-block;
     position: relative;
@@ -14,7 +18,7 @@ const StyledContainer = styled.div`
     width: 18px;
     height: 18px;
     margin: 2px;
-    border: 4px solid #9ca3af;
+    border: 3px solid #9ca3af;
     border-radius: 50%;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: #9ca3af transparent transparent transparent;

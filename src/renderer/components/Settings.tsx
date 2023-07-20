@@ -83,12 +83,12 @@ bootnodes => show list of bootnode identifiers
 */
 export default function Settings({ onClose }: { onClose: any }) {
   const [releases, setReleases] = useState([]);
-  const [chainSpecs, setChainSpecs] = useState([]);
 
-  const RPCExternal = [
+  const booleanValues = [
     { value: 'true', label: 'true' },
     { value: 'false', label: 'false' },
   ];
+
   const RPCMethods = [
     { value: 'unsafe', label: 'unsafe' },
     { value: 'safe', label: 'safe' },
@@ -150,9 +150,9 @@ export default function Settings({ onClose }: { onClose: any }) {
 
           {/* rpc-external */}
           <SettingContainer>
-            <SettingHeading>Rpc External</SettingHeading>
+            <SettingHeading>RPC External</SettingHeading>
             <StyledSelect
-              options={RPCExternal}
+              options={booleanValues}
               value={{
                 value: nodeConfig.RPCExternal,
                 label: nodeConfig.RPCExternal,
@@ -165,7 +165,7 @@ export default function Settings({ onClose }: { onClose: any }) {
 
           {/* rpc-methods */}
           <SettingContainer>
-            <SettingHeading>Rpc Method</SettingHeading>
+            <SettingHeading>RPC Method</SettingHeading>
             <StyledSelect
               options={RPCMethods}
               value={{
@@ -180,7 +180,7 @@ export default function Settings({ onClose }: { onClose: any }) {
 
           {/* rpc-port */}
           <SettingContainer>
-            <SettingHeading>Rpc Port</SettingHeading>
+            <SettingHeading>RPC Port</SettingHeading>
             <Input
               placeholder="Default Port Number is 9944"
               style={{
@@ -216,7 +216,7 @@ export default function Settings({ onClose }: { onClose: any }) {
 
           {/* rpc-cors */}
           <SettingContainer>
-            <SettingHeading>Rpc Cors</SettingHeading>
+            <SettingHeading>RPC CORS</SettingHeading>
             <Input
               placeholder="Enter CORS rules"
               style={{
@@ -228,6 +228,21 @@ export default function Settings({ onClose }: { onClose: any }) {
               value={nodeConfig.RPCCors}
               onChange={(event: any) =>
                 configKeyUpdate('RPCCors', event.target.value)
+              }
+            />
+          </SettingContainer>
+
+          {/* development mode */}
+          <SettingContainer>
+            <SettingHeading>Development Mode</SettingHeading>
+            <StyledSelect
+              options={booleanValues}
+              value={{
+                value: nodeConfig.developmentMode,
+                label: nodeConfig.developmentMode,
+              }}
+              onChange={(value: any) =>
+                configKeyUpdate('developmentMode', value.value)
               }
             />
           </SettingContainer>
@@ -252,7 +267,7 @@ export default function Settings({ onClose }: { onClose: any }) {
 
           {/* telemetry-url */}
           <SettingContainer>
-            <SettingHeading>Telemetry Url</SettingHeading>
+            <SettingHeading>Telemetry URL</SettingHeading>
             <Input
               value={nodeConfig.telemetryURL}
               placeholder="Enter telemetry url with verbose level"
