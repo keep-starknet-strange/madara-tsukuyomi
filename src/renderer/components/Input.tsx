@@ -19,7 +19,7 @@ export default function Input({
   placeholder = '',
   style = {},
   onChange,
-  value = '',
+  value,
 }: {
   placeholder?: string;
   style?: CSSProperties;
