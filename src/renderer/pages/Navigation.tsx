@@ -178,12 +178,29 @@ export default function Navigtion() {
                 </NavbarItem>
               );
             })}
+          <NavbarItem
+            style={{ display: 'flex', marginTop: 'auto' }}
+            onClick={() => handleScreenshot()}
+            active={false}
+          >
+            {showSpinner ? (
+              <Spinner />
+            ) : (
+              <img
+                src={TwitterIcon}
+                width={16}
+                height={16}
+                alt="twitter icon"
+                style={{ marginRight: 10 }}
+              />
+            )}
+            <div>Did you tweet?</div>
+          </NavbarItem>
           {isNodeRunning ? (
             <NavbarItem
               onClick={() => {
                 dispatch(stopNode());
               }}
-              style={{ marginTop: 'auto' }}
               active={false}
             >
               🔌 Stop Node
@@ -199,24 +216,6 @@ export default function Navigtion() {
               ▶️ Resume Node
             </NavbarItem>
           )}
-          <NavbarItem
-            style={{ display: 'flex' }}
-            onClick={() => handleScreenshot()}
-            active={false}
-          >
-            {showSpinner ? (
-              <Spinner />
-            ) : (
-              <img
-                src={TwitterIcon}
-                width={16}
-                height={16}
-                alt="twitter icon"
-                style={{ marginRight: 10 }}
-              />
-            )}
-            <div>Tweet</div>
-          </NavbarItem>
           <NavbarItem
             onClick={() => {
               dispatch(deleteNode());
