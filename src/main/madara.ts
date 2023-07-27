@@ -151,10 +151,6 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     }
   });
 
-  if (process.env.NODE_ENV === 'development') {
-    args = [...args, CHAIN_DB_FOLDER];
-  }
-
   const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath
   if (process.platform !== 'win32') {
