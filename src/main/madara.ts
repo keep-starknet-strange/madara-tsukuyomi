@@ -138,7 +138,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  let args = ['--base-path'];
+  let args = ['--base-path', CHAIN_DB_FOLDER];
   Object.keys(config).forEach((eachKey) => {
     if (config[eachKey].length > 0 && config[eachKey] !== undefined) {
       if (eachKey === 'RPCExternal') {
@@ -159,9 +159,6 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
       }
     }
   });
-  if (process.env.NODE_ENV === 'development') {
-    args = [...args, CHAIN_DB_FOLDER];
-  }
 
   const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath
@@ -179,6 +176,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
   childProcess.on('close', () => {
     try {
       window.webContents.send('node-stop');
+      childProcess = undefined;
     } catch (err) {
       // if the user has closed the window then this emit won't work and it throws an error dialog, hence try catch
     }

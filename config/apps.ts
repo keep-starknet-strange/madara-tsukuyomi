@@ -34,7 +34,7 @@ const APPS_CONFIG = {
       binaryFiles: [
         {
           name: 'explorer',
-          url: 'https://raw.githubusercontent.com/keep-starknet-strange/madara-infra/stack/bins/starknet-stack/bin/madara-explorer.tar',
+          url: 'https://github.com/keep-starknet-strange/madara-infra/releases/download/starknet-stack-precompiled-bins/madara-explorer.tar',
         },
       ],
       showFrontend: true,
@@ -46,6 +46,25 @@ const APPS_CONFIG = {
       ],
       runCommamd: [
         'RPC_API_HOST=http://localhost:9944 SECRET_KEY_BASE=JyULoT5cLBifW+XNEuCTVoAb+SaFgQt9j227RN0cKpR3wTsrApGd1HNcgeopemyl DATABASE_URL=ecto://postgres:postgres@localhost:5432/starknet_explorer_dev PHX_HOST=localhost PORT=8080 ./explorer/starknet_explorer/bin/starknet_explorer start',
+      ],
+    },
+    {
+      id: '20328678-1cec-4e84-a2ea-0b83cd84bece',
+      appName: 'Dojo Chess',
+      configParams: {},
+      binaryFiles: [
+        {
+          name: 'chess',
+          url: 'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/app_demo/config/dojo_chess/deploy_files.zip',
+        },
+      ],
+      showFrontend: false,
+      frontendUrl: 'http://localhost:8080',
+      logoUrl:
+        'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
+      postInstallationCommands: ['unzip chess/deploy_files.zip -d chess/'],
+      runCommamd: [
+        'sozo migrate --manifest-path ./chess/deploy_files/Scarb.toml',
       ],
     },
   ],

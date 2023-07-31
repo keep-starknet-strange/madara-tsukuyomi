@@ -148,6 +148,24 @@ export default function Settings({ onClose }: { onClose: any }) {
             />
           </SettingContainer>
 
+          {/* testnet */}
+          <SettingContainer>
+            <SettingHeading>Testnet</SettingHeading>
+            <Input
+              value={nodeConfig.testnet}
+              placeholder="Testnet name"
+              style={{
+                fontSize: '1rem',
+                width: '100%',
+                textAlign: 'left',
+                marginTop: '1rem',
+              }}
+              onChange={(event: any) =>
+                configKeyUpdate('testnet', event.target.value)
+              }
+            />
+          </SettingContainer>
+
           {/* rpc-external */}
           <SettingContainer>
             <SettingHeading>RPC External</SettingHeading>
