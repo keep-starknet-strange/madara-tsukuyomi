@@ -1,19 +1,18 @@
 // Import the Firebase Dynamic Links API library
 import axios from 'axios';
-
-const API_KEY = 'AIzaSyC-u7ceUKNo8jyKw5I1YEazN4poQqhngbo';
+import { TELEMETRY_LINK } from './constants';
 
 // url for getting dynamic link
-const FIRE_BASE_URL = `https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=${API_KEY}`;
 
 // function to create dynamic links
-async function createShortLink(imageLink: string): Promise<void> {
+async function createShortLink(imageLink: string): Promise<string | null> {
+  const FIREBASE_REQUEST_URL = `https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=${process.env.FIREBASE_API_KEY}`;
   let response;
   try {
-    response = await axios.post(FIRE_BASE_URL, {
+    response = await axios.post(FIREBASE_REQUEST_URL, {
       dynamicLinkInfo: {
-        domainUriPrefix: 'https://madarazone.page.link',
-        link: 'https://telemetry.madara.zone',
+        domainUriPrefix: process.env.FIREBASE_DYNAMIC_LINK_PREFIX,
+        link: TELEMETRY_LINK,
         socialMetaTagInfo: {
           socialTitle: 'Madara Desktop App',
           socialDescription: 'One click solution to run node on your desktop',
@@ -26,7 +25,8 @@ async function createShortLink(imageLink: string): Promise<void> {
     });
     return response.data.shortLink;
   } catch (err) {
-    console.error(err);
+    console.log(err);
+    return null;
   }
 }
 

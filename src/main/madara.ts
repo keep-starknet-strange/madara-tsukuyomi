@@ -7,7 +7,8 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp } from 'firebase/app';
 import path from 'path';
 import sharp from 'sharp';
-import { MADARA_APP_PATH } from './constants';
+import { MADARA_APP_PATH, NODE_CONFIG_DIRECTORY } from './constants';
+import { MadaraConfig } from './types';
 
 const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
 
@@ -20,19 +21,8 @@ const CHAIN_DB_FOLDER = `${MADARA_APP_PATH}/data`;
 const GIT_RELEASE_BASE_PATH =
   'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/releases';
 
-export type MadaraConfig = {
-  name?: string;
-  RPCCors: string;
-  RPCExternal: string;
-  RPCMethods: string;
-  port: string;
-  RPCPort: string;
-  telemetryURL: string;
-  bootnodes: string;
-  testnet: string;
-  release: string;
-  developmentMode: string;
-};
+const EQUALITY_FLAGS = ['RPCMethods', 'RPCCors'];
+const BOOLEAN_FLAGS = ['RPCExternal', 'developmentMode'];
 
 const SETUP_FILES = [
   {
@@ -116,20 +106,6 @@ export async function setup(window: BrowserWindow, config: MadaraConfig) {
   }
 }
 
-const keyToStateMap = {
-  RPCCors: '--rpc-cors',
-  RPCExternal: '--rpc-external',
-  RPCMethods: '--rpc-methods',
-  port: '--port',
-  RPCPort: '--rpc-port',
-  telemetryURL: '--telemetry-url',
-  bootnodes: '--bootnodes',
-  testnet: '--testnet',
-  name: '--name',
-  release: '--release',
-  developmentMode: '--dev',
-};
-
 // this is a global variable that stores the latest childProcess
 let childProcess: ChildProcessWithoutNullStreams | undefined;
 export async function start(window: BrowserWindow, config: MadaraConfig) {
@@ -138,25 +114,35 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  let args = ['--base-path', CHAIN_DB_FOLDER];
+  const args = ['--base-path', CHAIN_DB_FOLDER];
   Object.keys(config).forEach((eachKey) => {
-    if (config[eachKey].length > 0 && config[eachKey] !== undefined) {
-      if (eachKey === 'RPCExternal') {
-        if (config[eachKey] === 'true') {
-          args.push(keyToStateMap[eachKey].trim);
-        }
-      } else if (eachKey === 'developmentMode') {
-        if (config[eachKey] === 'true') {
-          args.push(keyToStateMap[eachKey].trim());
-        }
-      } else if (eachKey === 'RPCMethods' || eachKey === 'RPCCors') {
-        if (config[eachKey].length > 0) {
-          args.push(`${keyToStateMap[eachKey]}=${config[eachKey].trim()}`);
-        }
-      } else if (eachKey !== 'release') {
-        args.push(keyToStateMap[eachKey]);
-        args.push(config[eachKey].trim());
+    //get value from node config input by user
+    const value = config[eachKey as keyof MadaraConfig];
+
+    // return if no value present in config
+    if (!value) return;
+
+    // get argument name for cmd line
+    const argumentName =
+      NODE_CONFIG_DIRECTORY[eachKey as keyof typeof NODE_CONFIG_DIRECTORY];
+
+    // if boolean flag then add argument name only
+    if (BOOLEAN_FLAGS.includes(eachKey)) {
+      // check if string value is true
+      if (value == 'true') {
+        args.push(argumentName);
       }
+    }
+
+    // add argument name with config value
+    else if (EQUALITY_FLAGS.includes(eachKey)) {
+      args.push(`${argumentName}=${value}`);
+    }
+
+    // add value with
+    else if (eachKey !== 'release') {
+      args.push(argumentName);
+      args.push(value);
     }
   });
 
@@ -203,7 +189,7 @@ export function childProcessInMemory(): boolean {
   return childProcess !== undefined;
 }
 
-export async function getFile() {
+export async function getFile(): Promise<Buffer | null> {
   const filePath = '../../image.png'; // Replace with the actual path to your file
   try {
     const data = await fs.readFileSync(path.resolve(__dirname, filePath));
@@ -211,6 +197,7 @@ export async function getFile() {
     return data ?? fa;
   } catch (err) {
     console.error(err);
+    return null;
   }
 }
 
@@ -218,6 +205,16 @@ export async function uploadFilesToStorageFirebase(file: Buffer) {
   const firebaseApp = getApp();
 
   const storage = getStorage(firebaseApp);
+
+  /*
+
+  when pushing for production we can switch to
+  appending current date time to image name
+
+  const storageRef = ref(storage, `image_${Date.now()}.png`);
+
+  */
+
   // Create a storage reference from our storage service-
   const storageRef = ref(storage, 'image.png');
 

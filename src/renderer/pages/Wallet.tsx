@@ -47,8 +47,6 @@ const NewWalletButton = styled.div`
 function Value({ value }: { value: string }) {
   return (
     <Input
-      verticalPadding="0.5rem"
-      horizontalPadding="1rem"
       onChange={() => {}}
       style={{
         width: '50%',
@@ -57,6 +55,7 @@ function Value({ value }: { value: string }) {
         color: 'grey',
         caretColor: 'transparent',
         marginBottom: '2rem',
+        padding: '0.5rem 1rem',
       }}
       value={value}
     />

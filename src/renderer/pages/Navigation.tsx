@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import _ from 'lodash';
 import { ReactNode, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { stopNode } from 'renderer/features/nodeSlice';
 import Spinner from 'renderer/components/Spinner';
 import { selectRunningApps } from 'renderer/features/appsSlice';
 import {

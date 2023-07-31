@@ -173,7 +173,9 @@ export default function Landing() {
     );
 
     // wait for 1 second
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
 
     dispatch(startNode());
     navigate('/navigation/logs');
@@ -192,11 +194,11 @@ export default function Landing() {
     <LandingContainer
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      key={'landing_container'}
+      key="landing_container"
     >
       <AnimatePresence>
         {isSettingsOpen && (
-          <Settings onClose={() => setIsSettingsOpen(false)}></Settings>
+          <Settings onClose={() => setIsSettingsOpen(false)} />
         )}
       </AnimatePresence>
       <HeadingRow>
@@ -218,7 +220,6 @@ export default function Landing() {
       />
       <FormContainer onSubmit={handleFormSubmit} animate={formAnimationControl}>
         <Input
-          value={nodeConfig.name}
           placeholder="What name shall you be known by in this realm?"
           style={{
             fontSize: '1rem',
