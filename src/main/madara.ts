@@ -119,7 +119,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  let args = ['--base-path', CHAIN_DB_FOLDER];
+  const args = ['--base-path', CHAIN_DB_FOLDER];
   Object.keys(config).forEach((eachKey) => {
     // get value from node config input by user
     const value = config[eachKey as keyof MadaraConfig];
