@@ -34,7 +34,7 @@ const APPS_CONFIG = {
       binaryFiles: [
         {
           name: 'explorer',
-          url: 'https://raw.githubusercontent.com/keep-starknet-strange/madara-infra/stack/bins/starknet-stack/bin/madara-explorer.tar',
+          url: 'https://github.com/keep-starknet-strange/madara-infra/releases/download/starknet-stack-precompiled-bins/madara-explorer.tar',
         },
       ],
       showFrontend: true,
