@@ -52,7 +52,9 @@ ipcMain.handle('release-exists', (event, config: MadaraConfig) => {
 });
 
 ipcMain.handle('send-tweet', async () => {
-  await Madara.getScreenShotWindow(mainWindow as BrowserWindow);
+  await Madara.getCurrentWindowScreenshot(mainWindow as BrowserWindow);
+
+  // firebase setup
   const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -61,11 +63,20 @@ ipcMain.handle('send-tweet', async () => {
   };
 
   initializeApp(firebaseConfig);
-  const file = await Madara.getFile();
+
+  const file = await Madara.fetchScreenshotFromSystem();
+
+  // return if screenshot image is not fetched
   if (!file) return;
+
   const shortURL = await Madara.uploadFilesToStorageFirebase(file);
-  const getShortenedLink = await createShortLink(shortURL);
-  shell.openExternal(TWEET_INTENT + getShortenedLink);
+  const shortenedLink = await createShortLink(shortURL);
+
+  // return if link creation fails
+  if (!shortenedLink) return;
+
+  // open link in browser
+  shell.openExternal(TWEET_INTENT + shortenedLink);
 });
 
 ipcMain.handle('child-process-in-memory', (): boolean => {
