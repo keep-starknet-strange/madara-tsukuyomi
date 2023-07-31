@@ -52,7 +52,6 @@ ipcMain.handle('release-exists', (event, config: MadaraConfig) => {
 
 ipcMain.handle('send-tweet', async () => {
   await Madara.getCurrentWindowScreenshot(mainWindow as BrowserWindow);
-
   const file = await Madara.fetchScreenshotFromSystem();
 
   // return if screenshot image is not fetched
