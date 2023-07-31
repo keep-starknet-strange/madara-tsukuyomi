@@ -53,7 +53,7 @@ function getSetupFiles(config: MadaraConfig) {
   });
 }
 
-export async function getScreenShotWindow(win: BrowserWindow) {
+export async function getCurrentWindowScreenshot(win: BrowserWindow) {
   const contents = win.webContents;
   const nativeImage = await contents.capturePage();
   await fs.promises.writeFile('image.png', nativeImage.toPNG());
@@ -189,7 +189,7 @@ export function childProcessInMemory(): boolean {
   return childProcess !== undefined;
 }
 
-export async function getFile(): Promise<Buffer | null> {
+export async function fetchScreenshotFromSystem(): Promise<Buffer | null> {
   const filePath = '../../image.png'; // Replace with the actual path to your file
   try {
     const data = await fs.readFileSync(path.resolve(__dirname, filePath));
