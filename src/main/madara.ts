@@ -116,7 +116,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
 
   const args = ['--base-path', CHAIN_DB_FOLDER];
   Object.keys(config).forEach((eachKey) => {
-    //get value from node config input by user
+    // get value from node config input by user
     const value = config[eachKey as keyof MadaraConfig];
 
     // return if no value present in config
@@ -129,7 +129,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     // if boolean flag then add argument name only
     if (BOOLEAN_FLAGS.includes(eachKey)) {
       // check if string value is true
-      if (value == 'true') {
+      if (value === 'true') {
         args.push(argumentName);
       }
     }
@@ -139,7 +139,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
       args.push(`${argumentName}=${value}`);
     }
 
-    // add value with
+    // add value with argument name
     else if (eachKey !== 'release') {
       args.push(argumentName);
       args.push(value);
