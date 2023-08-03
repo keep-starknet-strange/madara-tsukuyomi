@@ -13,7 +13,6 @@ const APP_PROCESSES: { [appId: string]: ChildProcess[] } = {};
 
 export async function downloadApp(window: BrowserWindow, appId: string) {
   const appConfig = APPS_CONFIG.apps.filter((app) => app.id === appId)[0];
-  console.log('app config - ', appConfig);
   for (let i = 0; i < appConfig.binaryFiles.length; i++) {
     const binary = appConfig.binaryFiles[i];
     await download(window, binary.url, {
@@ -21,7 +20,6 @@ export async function downloadApp(window: BrowserWindow, appId: string) {
       saveAs: false,
       overwrite: true,
       onProgress: (progress: any) => {
-        console.log(progress);
         window.webContents.send('app-download-progress', {
           appId,
           filename: binary.name,
@@ -69,7 +67,6 @@ export async function startApp(window: BrowserWindow, appId: string) {
 }
 
 export async function stopApp(window: BrowserWindow, appId: string) {
-  console.log('insdie app stop backend');
   if (APP_PROCESSES[appId] !== undefined) {
     APP_PROCESSES[appId].forEach((process) => {
       process.kill();
