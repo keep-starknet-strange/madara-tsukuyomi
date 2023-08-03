@@ -13,13 +13,12 @@ import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
-import { initializeApp } from 'firebase/app';
 import * as Madara from './madara';
 import * as MadaraApp from './madara-app';
 import { resolveHtmlPath } from './util';
-import createShortLink from './firebase';
 import { TWEET_INTENT } from './constants';
 import { MadaraConfig } from './types';
+import FireBaseService from './firebase';
 
 class AppUpdater {
   constructor() {
@@ -54,23 +53,13 @@ ipcMain.handle('release-exists', (event, config: MadaraConfig) => {
 ipcMain.handle('send-tweet', async () => {
   await Madara.getCurrentWindowScreenshot(mainWindow as BrowserWindow);
 
-  // firebase setup
-  const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    appId: process.env.FIREBASE_APP_ID,
-  };
-
-  initializeApp(firebaseConfig);
-
   const file = await Madara.fetchScreenshotFromSystem();
 
   // return if screenshot image is not fetched
   if (!file) return;
 
-  const shortURL = await Madara.uploadFilesToStorageFirebase(file);
-  const shortenedLink = await createShortLink(shortURL);
+  const imageURL = await FireBaseService.uploadFilesToStorageFirebase(file);
+  const shortenedLink = await FireBaseService.createShortLink(imageURL);
 
   // return if link creation fails
   if (!shortenedLink) return;
