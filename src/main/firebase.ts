@@ -22,7 +22,7 @@ class FireBaseService {
    * Call this function to create a dynamic link with the image url which we need to
    * show in open graph tags
    */
-  static async createShortLink(imageLink: string): Promise<string | null> {
+  static async createShortLink(imageLink: string): Promise<string> {
     const FIREBASE_REQUEST_URL = `https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=${process.env.FIREBASE_API_KEY}`;
     let response;
     try {
@@ -78,7 +78,7 @@ class FireBaseService {
       const res = await getDownloadURL(snapshot.ref);
       return res;
     } catch (error) {
-      throw new Error('Failed to upload asset to firebase storage');
+      throw new Error('Failed to upload asset to storage');
     }
   }
 }
