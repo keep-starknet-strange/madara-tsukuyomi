@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { MadaraConfig } from 'main/madara';
+import { MadaraConfig } from 'main/types';
 import { getStore } from 'renderer/store/storeRegistry';
 
 export type configTypes =

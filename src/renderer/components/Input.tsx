@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { CSSProperties } from 'react';
+import React, { CSSProperties } from 'react';
 import { styled } from 'styled-components';
 
 const InputContainer = styled.input`
@@ -23,8 +23,8 @@ export default function Input({
 }: {
   placeholder?: string;
   style?: CSSProperties;
-  onChange: any;
-  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string | undefined;
 }) {
   return (
     <InputContainer

@@ -8,6 +8,7 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
+import 'dotenv/config';
 import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
@@ -17,6 +18,8 @@ import * as Madara from './madara';
 import * as MadaraApp from './madara-app';
 import { resolveHtmlPath } from './util';
 import createShortLink from './firebase';
+import { TWEET_INTENT } from './constants';
+import { MadaraConfig } from './types';
 
 class AppUpdater {
   constructor() {
@@ -28,7 +31,7 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.handle('madara-start', async (event, config: Madara.MadaraConfig) => {
+ipcMain.handle('madara-start', async (event, config: MadaraConfig) => {
   await Madara.start(mainWindow as BrowserWindow, config);
 });
 
@@ -40,33 +43,40 @@ ipcMain.handle('madara-delete', async () => {
   await Madara.deleteNode();
 });
 
-ipcMain.handle('madara-setup', async (event, config: Madara.MadaraConfig) => {
+ipcMain.handle('madara-setup', async (event, config: MadaraConfig) => {
   await Madara.setup(mainWindow as BrowserWindow, config);
 });
 
-ipcMain.handle('release-exists', (event, config: Madara.MadaraConfig) => {
+ipcMain.handle('release-exists', (event, config: MadaraConfig) => {
   return Madara.releaseExists(config);
 });
 
 ipcMain.handle('send-tweet', async () => {
-  await Madara.getScreenShotWindow(mainWindow as BrowserWindow);
+  await Madara.getCurrentWindowScreenshot(mainWindow as BrowserWindow);
+
+  // firebase setup
   const firebaseConfig = {
-    apiKey: 'AIzaSyC-u7ceUKNo8jyKw5I1YEazN4poQqhngbo',
-    authDomain: 'test-b5696.firebaseapp.com',
-    projectId: 'test-b5696',
-    storageBucket: 'test-b5696.appspot.com',
-    messagingSenderId: '627711477848',
-    appId: '1:627711477848:web:17917840281ff63c3ca22d',
-    measurementId: 'G-RL4PH93SQ3',
+    apiKey: process.env.FIREBASE_API_KEY,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    appId: process.env.FIREBASE_APP_ID,
   };
 
   initializeApp(firebaseConfig);
-  const file = await Madara.getFile();
+
+  const file = await Madara.fetchScreenshotFromSystem();
+
+  // return if screenshot image is not fetched
+  if (!file) return;
+
   const shortURL = await Madara.uploadFilesToStorageFirebase(file);
-  const getShortenedLink = await createShortLink(shortURL);
-  shell.openExternal(
-    `https://twitter.com/intent/tweet?text=Just%20ran%20my%20blazingly%20fast%20%40MadaraStarknet%20node%20in%20less%20than%20a%20minute%20%E2%9A%A1.%20Check%20out%20all%20the%20Sharingan%20nodes%20here%20-%20${getShortenedLink}`
-  );
+  const shortenedLink = await createShortLink(shortURL);
+
+  // return if link creation fails
+  if (!shortenedLink) return;
+
+  // open link in browser
+  shell.openExternal(TWEET_INTENT + shortenedLink);
 });
 
 ipcMain.handle('child-process-in-memory', (): boolean => {
