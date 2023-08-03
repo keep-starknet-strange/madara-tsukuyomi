@@ -31,6 +31,7 @@ export type MadaraConfig = {
   bootnodes: string;
   testnet: string;
   release: string;
+  developmentMode: string;
 };
 
 const SETUP_FILES = [
@@ -126,6 +127,7 @@ const keyToStateMap = {
   testnet: '--testnet',
   name: '--name',
   release: '--release',
+  developmentMode: '--dev',
 };
 
 // this is a global variable that stores the latest childProcess
@@ -142,6 +144,10 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
       if (eachKey === 'RPCExternal') {
         if (config[eachKey] === 'true') {
           args.push(keyToStateMap[eachKey].trim);
+        }
+      } else if (eachKey === 'developmentMode') {
+        if (config[eachKey] === 'true') {
+          args.push(keyToStateMap[eachKey].trim());
         }
       } else if (eachKey === 'RPCMethods' || eachKey === 'RPCCors') {
         if (config[eachKey].length > 0) {

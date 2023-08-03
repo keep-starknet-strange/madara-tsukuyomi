@@ -12,7 +12,8 @@ export type configTypes =
   | 'bootnodes'
   | 'testnet'
   | 'name'
-  | 'release';
+  | 'release'
+  | 'developmentMode';
 
 const initialState = {
   logs: '',
@@ -28,6 +29,7 @@ const initialState = {
     testnet: 'sharingan',
     name: '',
     release: 'v0.1.0-testnet-sharingan-beta.8.2',
+    developmentMode: 'false',
   },
   setupComplete: false,
 };
