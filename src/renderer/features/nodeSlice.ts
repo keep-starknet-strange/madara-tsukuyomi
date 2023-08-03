@@ -104,9 +104,13 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
 };
 
 export const deleteNode = () => async (dispatch: any, getState: any) => {
+  const isRunning = selectIsRunning(getState());
+  if (!isRunning) {
+    return;
+  }
+  await window.electron.ipcRenderer.madara.delete();
   dispatch(setIsRunning(false));
   dispatch(setLogs(''));
-  await window.electron.ipcRenderer.madara.delete();
 };
 
 // set up listener to get all log events

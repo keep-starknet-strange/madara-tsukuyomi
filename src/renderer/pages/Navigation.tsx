@@ -14,6 +14,8 @@ import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
 import { selectRunningApps } from 'renderer/features/appsSlice';
 import MadaraLogo from '../../../assets/madara-logo.png';
+import APPS_CONFIG from '../../../config/apps';
+import Apps from './Apps';
 import Logs from './Logs';
 import Telemetry from './Telemetry';
 import TwitterIcon from '../../../assets/twitter.png';
