@@ -19,12 +19,12 @@ export default function Input({
   placeholder = '',
   style = {},
   onChange,
-  value = '',
+  value,
 }: {
   placeholder?: string;
   style?: CSSProperties;
   onChange: any;
-  value: any;
+  value: string;
 }) {
   return (
     <InputContainer
@@ -34,6 +34,7 @@ export default function Input({
       }}
       placeholder={placeholder}
       onChange={onChange}
+      value={value}
     />
   );
 }
