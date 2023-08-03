@@ -174,7 +174,7 @@ export default function Apps() {
       <Heading>Apps</Heading>
       <AppRows>
         {APPS_CONFIG.apps.map((app) => {
-          let appRightJsx = <></>;
+          let appRightJsx;
           if (runningApps[app.id]) {
             appRightJsx = (
               <FontAwesomeIcon

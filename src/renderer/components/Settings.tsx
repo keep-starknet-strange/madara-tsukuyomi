@@ -69,18 +69,6 @@ const CloseButton = styled.div`
   cursor: pointer;
 `;
 
-/*
-releases => dropdown
-chain spec => file path - can be asked to browse
-rpc-cors => null , all , custom list of origins
-rpc-external => true/false , try to give unsafe option here too
-rpc-methods => unsafe , safe , auto(default)
-port => input
-rpc_port => input
-name => input
-telemetry-url => add urls in 0->9 format with drag and drop
-bootnodes => show list of bootnode identifiers
-*/
 export default function Settings({ onClose }: { onClose: any }) {
   const [releases, setReleases] = useState([]);
 
@@ -160,7 +148,7 @@ export default function Settings({ onClose }: { onClose: any }) {
                 textAlign: 'left',
                 marginTop: '1rem',
               }}
-              onChange={(event: any) =>
+              onChange={(event) =>
                 configKeyUpdate('testnet', event.target.value)
               }
             />
@@ -208,7 +196,7 @@ export default function Settings({ onClose }: { onClose: any }) {
                 marginTop: '1rem',
               }}
               value={nodeConfig.RPCPort}
-              onChange={(event: any) =>
+              onChange={(event) =>
                 configKeyUpdate('RPCPort', event.target.value)
               }
             />
@@ -226,9 +214,7 @@ export default function Settings({ onClose }: { onClose: any }) {
                 textAlign: 'left',
                 marginTop: '1rem',
               }}
-              onChange={(event: any) =>
-                configKeyUpdate('port', event.target.value)
-              }
+              onChange={(event) => configKeyUpdate('port', event.target.value)}
             />
           </SettingContainer>
 
@@ -244,7 +230,7 @@ export default function Settings({ onClose }: { onClose: any }) {
                 marginTop: '1rem',
               }}
               value={nodeConfig.RPCCors}
-              onChange={(event: any) =>
+              onChange={(event) =>
                 configKeyUpdate('RPCCors', event.target.value)
               }
             />
@@ -277,7 +263,7 @@ export default function Settings({ onClose }: { onClose: any }) {
                 textAlign: 'left',
                 marginTop: '1rem',
               }}
-              onChange={(event: any) =>
+              onChange={(event) =>
                 configKeyUpdate('bootnodes', event.target.value)
               }
             />
@@ -295,7 +281,7 @@ export default function Settings({ onClose }: { onClose: any }) {
                 textAlign: 'left',
                 marginTop: '1rem',
               }}
-              onChange={(event: any) =>
+              onChange={(event) =>
                 configKeyUpdate('telemetryURL', event.target.value)
               }
             />
