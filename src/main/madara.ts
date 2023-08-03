@@ -151,6 +151,8 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     }
   });
 
+  console.log('these are the args - ', args, config);
+
   const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath
   if (process.platform !== 'win32') {
