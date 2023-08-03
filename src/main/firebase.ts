@@ -25,7 +25,7 @@ async function createShortLink(imageLink: string): Promise<string | null> {
     });
     return response.data.shortLink;
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return null;
   }
 }
