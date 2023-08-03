@@ -19,6 +19,7 @@ import { resolveHtmlPath } from './util';
 import { TWEET_INTENT } from './constants';
 import { MadaraConfig } from './types';
 import FireBaseService from './firebase';
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
