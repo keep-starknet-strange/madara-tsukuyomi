@@ -24,7 +24,6 @@ export const { setInstalledApps, setRunningApps } = appsSlice.actions;
 
 export const selectInstalledApps = (state: any) => state.apps.installedApps;
 export const selectRunningApps = (state: any) => {
-  console.log('reading the state now - ', state);
   return state.apps.runningApps;
 };
 
@@ -36,7 +35,6 @@ export const setAppAsInstalled =
 
 export const updateAppRunningStatus =
   (appId: string, status: boolean) => (dispatch: any, getState: any) => {
-    console.log('state inside set app as running - ', getState());
     const runningApps = selectRunningApps(getState());
     dispatch(setRunningApps({ ...runningApps, [appId]: status }));
   };
@@ -49,16 +47,15 @@ export const setupInstalledApps = () => async (dispatch: any) => {
 
 // listener to know when an app is running
 window.electron.ipcRenderer.madaraApp.onAppStart(
-  (event: any, data: { appId: string }) => {
-    getStore().dispatch(updateAppRunningStatus(data.appId, true));
-  }
+  (event: any, data: { appId: string }) =>
+    // @ts-ignore
+    getStore().dispatch(updateAppRunningStatus(data.appId, true))
 );
 
 window.electron.ipcRenderer.madaraApp.onAppStop(
-  (event: any, data: { appId: string }) => {
-    console.log('inside app stop!!');
-    getStore().dispatch(updateAppRunningStatus(data.appId, false));
-  }
+  (event: any, data: { appId: string }) =>
+    // @ts-ignore
+    getStore().dispatch(updateAppRunningStatus(data.appId, false))
 );
 
 export default appsSlice.reducer;
