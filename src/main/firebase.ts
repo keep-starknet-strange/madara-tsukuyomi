@@ -12,7 +12,7 @@ async function createShortLink(imageLink: string): Promise<void> {
   try {
     response = await axios.post(FIRE_BASE_URL, {
       dynamicLinkInfo: {
-        domainUriPrefix: 'https://testfull.page.link',
+        domainUriPrefix: 'https://madarazone.page.link',
         link: 'https://telemetry.madara.zone',
         socialMetaTagInfo: {
           socialTitle: 'Madara Desktop App',
