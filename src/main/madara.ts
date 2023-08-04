@@ -3,8 +3,6 @@ import { BrowserWindow, app } from 'electron';
 import { download } from 'electron-dl';
 import fs from 'fs';
 import _ from 'lodash';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getApp } from 'firebase/app';
 import path from 'path';
 import sharp from 'sharp';
 import { MADARA_APP_PATH, NODE_CONFIG_DIRECTORY } from './constants';
@@ -54,9 +52,16 @@ function getSetupFiles(config: MadaraConfig) {
 }
 
 export async function getCurrentWindowScreenshot(win: BrowserWindow) {
-  const contents = win.webContents;
-  const nativeImage = await contents.capturePage();
-  await fs.promises.writeFile('image.png', nativeImage.toPNG());
+  try {
+    const contents = win.webContents;
+    const nativeImage = await contents.capturePage();
+    await fs.promises.writeFile(
+      `${MADARA_APP_PATH}/image.png`,
+      nativeImage.toPNG()
+    );
+  } catch (error) {
+    throw new Error('Failed to fetch screenshot from path');
+  }
 }
 
 const getNotDownloadedFiles = (config: MadaraConfig) => {
@@ -195,42 +200,16 @@ export function childProcessInMemory(): boolean {
 }
 
 export async function fetchScreenshotFromSystem(): Promise<Buffer | null> {
-  const filePath = '../../image.png'; // Replace with the actual path to your file
+  const filePath = `${MADARA_APP_PATH}/image.png`; // Replace with the actual path to your file
   try {
     const data = await fs.readFileSync(path.resolve(__dirname, filePath));
     const fa = await sharp(data).rotate().resize(1048, 717).png().toBuffer();
+
+    // to delete the file after fetching
+    await fs.unlinkSync(path.resolve(__dirname, filePath));
+
     return data ?? fa;
   } catch (err) {
-    console.error(err);
-    return null;
+    throw new Error('failed to fetch screenshot from path');
   }
-}
-
-export async function uploadFilesToStorageFirebase(file: Buffer) {
-  const firebaseApp = getApp();
-
-  const storage = getStorage(firebaseApp);
-
-  /*
-
-  when pushing for production we can switch to
-  appending current date time to image name
-
-  const storageRef = ref(storage, `image_${Date.now()}.png`);
-
-  */
-
-  // Create a storage reference from our storage service-
-  const storageRef = ref(storage, 'image.png');
-
-  // Create file metadata including the content type
-  /** @type {any} */
-  const metadata = {
-    contentType: 'image/png',
-  };
-  // 'file' comes from the Blob or File API
-  const snapshot = await uploadBytes(storageRef, file, metadata);
-
-  const res = await getDownloadURL(snapshot.ref);
-  return res;
 }
