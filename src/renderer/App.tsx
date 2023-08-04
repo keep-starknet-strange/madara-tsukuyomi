@@ -12,12 +12,13 @@ import {
 } from './features/nodeSlice';
 import Landing from './pages/Landing';
 import Navigtion from './pages/Navigation';
-import store from './store/store';
-import { register } from './store/storeRegistry';
+import store, { persistor } from './store/store';
+import { registerPersistor, registerStore } from './store/storeRegistry';
 import { useAppDispatch, useAppSelector } from './utils/hooks';
 
-// putting the store in registry so that we can use it outside of react components
-register(store);
+// putting the store and persistor in registry so that we can use it outside of react components
+registerStore(store);
+registerPersistor(persistor);
 
 export default function App() {
   const location = useLocation();
