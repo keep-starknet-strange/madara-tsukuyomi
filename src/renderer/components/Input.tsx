@@ -1,4 +1,5 @@
 /* eslint-disable react/require-default-props */
+import React, { CSSProperties } from 'react';
 import { styled } from 'styled-components';
 
 const InputContainer = styled.input`
@@ -6,6 +7,8 @@ const InputContainer = styled.input`
   border: 1px solid #2c2e31;
   border-radius: 4px;
   color: white;
+  box-sizing: border-box;
+  padding: 0.7rem;
 
   &:focus {
     outline: none;
@@ -13,26 +16,20 @@ const InputContainer = styled.input`
 `;
 
 export default function Input({
-  verticalPadding = '0px',
-  horizontalPadding = '0px',
   placeholder = '',
   style = {},
   onChange,
+  value,
 }: {
-  verticalPadding?: string;
-  horizontalPadding?: string;
   placeholder?: string;
-  style?: object;
-  onChange: any;
+  style?: CSSProperties;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string | undefined;
 }) {
   return (
     <InputContainer
       value={value}
       style={{
-        paddingLeft: horizontalPadding,
-        paddingRight: horizontalPadding,
-        paddingTop: verticalPadding,
-        paddingBottom: verticalPadding,
         ...style,
       }}
       placeholder={placeholder}

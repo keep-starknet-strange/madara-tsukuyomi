@@ -8,18 +8,19 @@ import sharp from 'sharp';
 import { MADARA_APP_PATH, NODE_CONFIG_DIRECTORY } from './constants';
 import { MadaraConfig } from './types';
 
-const MADARA_APP_ROOT_FOLDER = '.madara-app';
-const RELEASES_FOLDER = `${app.getPath(
-  'home'
-)}/${MADARA_APP_ROOT_FOLDER}/releases`;
+const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
 
 // we download the chain specs for now because of an issue in the binaries
 // we can skip this step once this is fixed -  https://github.com/keep-starknet-strange/madara/issues/728
 const CHAIN_SPECS_FOLDER = `${app.getPath('home')}/.madara/chain-specs`;
+const CHAIN_DB_FOLDER = `${MADARA_APP_PATH}/data`;
 
 // TODO: update this once we have binary releases on Madara
 const GIT_RELEASE_BASE_PATH =
-  'https://raw.githubusercontent.com/apoorvsadana/madara-app/main/config/releases';
+  'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/releases';
+
+const EQUALITY_FLAGS = ['RPCMethods', 'RPCCors'];
+const BOOLEAN_FLAGS = ['RPCExternal', 'developmentMode'];
 
 const SETUP_FILES = [
   {
@@ -33,7 +34,7 @@ const SETUP_FILES = [
     showProgress: false,
   },
   {
-    url: `${GIT_RELEASE_BASE_PATH}/<%= git_tag %>`, // git_tag is replaced by the config
+    url: `${GIT_RELEASE_BASE_PATH}/<%= release %>`, // release is replaced by the config
     directory: RELEASES_FOLDER,
     showProgress: true,
   },
@@ -166,6 +167,7 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
   childProcess.on('close', () => {
     try {
       window.webContents.send('node-stop');
+      childProcess = undefined;
     } catch (err) {
       // if the user has closed the window then this emit won't work and it throws an error dialog, hence try catch
     }
@@ -175,10 +177,20 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
 export async function stop() {
   // stop the child process
   if (!childProcess) {
-    throw Error('No child process is running!');
+    // return safely if nothing is running
+    return;
   }
   childProcess.kill();
   childProcess = undefined;
+}
+
+export async function deleteNode() {
+  // stop the child process
+  await stop();
+  // delete the releases folder
+  if (fs.existsSync(CHAIN_DB_FOLDER)) {
+    fs.rmdirSync(CHAIN_DB_FOLDER, { recursive: true });
+  }
 }
 
 export function childProcessInMemory(): boolean {
