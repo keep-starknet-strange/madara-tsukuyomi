@@ -1,14 +1,32 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import appsReducer from '../features/appsSlice';
 import nodeReducer from '../features/nodeSlice';
+import walletReducer from '../features/walletSlice';
+
+const persistConfig = {
+  key: 'root',
+  version: 1,
+  storage,
+  blacklist: ['apps'],
+};
+
+const rootReducer = combineReducers({
+  node: nodeReducer,
+  wallet: walletReducer,
+  apps: appsReducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
-  reducer: {
-    node: nodeReducer,
-  },
+  reducer: persistedReducer,
   devTools: true,
 });
 
 export default store;
+export const persistor = persistStore(store);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
