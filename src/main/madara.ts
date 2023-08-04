@@ -60,7 +60,7 @@ export async function getCurrentWindowScreenshot(win: BrowserWindow) {
       nativeImage.toPNG()
     );
   } catch (error) {
-    throw new Error('failed to fetch screenshot from path');
+    throw new Error('Failed to fetch screenshot from path');
   }
 }
 
@@ -204,7 +204,10 @@ export async function fetchScreenshotFromSystem(): Promise<Buffer | null> {
   try {
     const data = await fs.readFileSync(path.resolve(__dirname, filePath));
     const fa = await sharp(data).rotate().resize(1048, 717).png().toBuffer();
+
+    // to delete the file after fetching
     await fs.unlinkSync(path.resolve(__dirname, filePath));
+
     return data ?? fa;
   } catch (err) {
     throw new Error('failed to fetch screenshot from path');
