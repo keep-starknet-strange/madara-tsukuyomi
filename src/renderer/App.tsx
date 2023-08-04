@@ -1,31 +1,45 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import axios from 'axios';
-import { useEffect } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import sharinganConfig from '../../config/sharingan.json';
+import React from 'react';
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import './App.css';
+import Landing from './pages/Landing';
+import Navigtion from './pages/Navigation';
+import store from './store/store';
+import { register } from './store/storeRegistry';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import {
   selectConfig,
-  selectSetupComplete,
+  selectIsRunning,
   setConfig,
   setIsRunning,
 } from './features/nodeSlice';
-import Landing from './pages/Landing';
-import Navigtion from './pages/Navigation';
-import store, { persistor } from './store/store';
-import { registerPersistor, registerStore } from './store/storeRegistry';
-import { useAppDispatch, useAppSelector } from './utils/hooks';
+import { useDispatch } from 'react-redux';
+import axios from 'axios';
 
-// putting the store and persistor in registry so that we can use it outside of react components
-registerStore(store);
-registerPersistor(persistor);
+// putting the store in registry so that we can use it outside of react components
+register(store);
 
 export default function App() {
   const location = useLocation();
-  const nodeConfig = useAppSelector(selectConfig);
-  const dispatch = useAppDispatch();
-  const isSetupComplete = useAppSelector(selectSetupComplete);
   const navigate = useNavigate();
+  const isNodeRunning = useSelector(selectIsRunning);
+  const nodeConfig = useSelector(selectConfig);
+  const dispatch = useDispatch();
+
+  // navigate every time isNodeRunning changes
+  useEffect(() => {
+    if (isNodeRunning) {
+      navigate('/navigation/logs');
+    } else {
+      navigate('/');
+    }
+  }, [isNodeRunning]);
 
   // check if the node is running and set the screen
   useEffect(() => {
@@ -40,29 +54,16 @@ export default function App() {
     })();
   }, []);
 
-  useEffect(() => {
-    if (isSetupComplete) {
-      navigate('/navigation/logs');
-    }
-  }, []);
-
   // get the config and set it in redux
   useEffect(() => {
     (async () => {
-      let gitTag;
-      if (process.env.NODE_ENV === 'development') {
-        gitTag = sharinganConfig.version_git_tag;
-      } else {
-        const response = await axios.get(
-          'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/sharingan.json'
-        );
-        gitTag = response.data.version_git_tag;
-      }
-
+      const response = await axios.get(
+        'https://raw.githubusercontent.com/apoorvsadana/madara-app/main/config/sharingan.json'
+      );
       dispatch(
         setConfig({
           ...nodeConfig,
-          release: gitTag,
+          git_tag: response.data.version_git_tag,
         })
       );
     })();
