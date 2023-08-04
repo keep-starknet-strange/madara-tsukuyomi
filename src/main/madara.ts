@@ -174,7 +174,8 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
 export async function stop() {
   // stop the child process
   if (!childProcess) {
-    throw Error('No child process is running!');
+    // return safely if nothing is running
+    return;
   }
   childProcess.kill();
   childProcess = undefined;
@@ -184,7 +185,9 @@ export async function deleteNode() {
   // stop the child process
   await stop();
   // delete the releases folder
-  fs.rmdirSync(CHAIN_DB_FOLDER, { recursive: true });
+  if (fs.existsSync(CHAIN_DB_FOLDER)) {
+    fs.rmdirSync(CHAIN_DB_FOLDER, { recursive: true });
+  }
 }
 
 export function childProcessInMemory(): boolean {
