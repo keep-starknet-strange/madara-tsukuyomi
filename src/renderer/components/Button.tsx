@@ -19,12 +19,14 @@ export default function Button({
   placeholder = '',
   text = '',
   style = {},
+  onClick,
 }: {
   verticalPadding?: string;
   horizontalPadding?: string;
   placeholder?: string;
   text?: string;
   style?: object;
+  onClick: any;
 }) {
   return (
     <ButtonContainer
@@ -36,6 +38,7 @@ export default function Button({
         ...style,
       }}
       placeholder={placeholder}
+      onClick={onClick}
     >
       {text}
     </ButtonContainer>
