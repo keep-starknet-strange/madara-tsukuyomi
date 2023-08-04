@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { ReactNode, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Spinner from 'renderer/components/Spinner';
-import { selectRunningApps } from 'renderer/features/appsSlice';
 import {
   deleteNode,
   selectIsRunning,
@@ -13,13 +12,14 @@ import {
 } from 'renderer/features/nodeSlice';
 import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
+import { selectRunningApps } from 'renderer/features/appsSlice';
 import MadaraLogo from '../../../assets/madara-logo.png';
-import APPS_CONFIG from '../../../config/apps';
-import Apps from './Apps';
 import Logs from './Logs';
 import Telemetry from './Telemetry';
 import TwitterIcon from '../../../assets/twitter.png';
 import AppViewer from './AppViewer';
+import APPS_CONFIG from '../../../config/apps';
+import Apps from './Apps';
 
 const NavbarContainer = styled(motion.div)`
   background-color: black;
