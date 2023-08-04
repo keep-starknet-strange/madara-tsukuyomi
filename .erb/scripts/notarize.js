@@ -1,4 +1,5 @@
 const { notarize } = require('@electron/notarize');
+const { build } = require('../../package.json');
 
 exports.default = async function notarizeMacos(context) {
   const { electronPlatformName, appOutDir } = context;
@@ -15,7 +16,7 @@ exports.default = async function notarizeMacos(context) {
 
   await notarize({
     appPath: `${appOutDir}/${appName}.app`,
-    keychainProfile: 'kss',
+    keychainProfile: "kss",
     tool: 'notarytool',
   });
 };

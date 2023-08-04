@@ -8,11 +8,7 @@ body {
 
 @font-face {
   font-family: 'Hack';
-  src: url('../../assets/fonts/hack/Hack-Regular.ttf') format('truetype');
+  src: url('../../assets/fonts/Hack/Hack-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
-}
-
-.toast-progress-bar {
-  background-color: #e62600 !important;
 }

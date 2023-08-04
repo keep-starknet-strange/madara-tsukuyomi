@@ -8,13 +8,11 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import 'dotenv/config';
 import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import * as Madara from './madara';
-import * as MadaraApp from './madara-app';
 import { resolveHtmlPath } from './util';
 import FireBaseService from './firebase';
 import { MadaraConfig } from './types';
@@ -30,7 +28,7 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.handle('madara-start', async (event, config: MadaraConfig) => {
+ipcMain.handle('madara-start', async (event, config: Madara.MadaraConfig) => {
   await Madara.start(mainWindow as BrowserWindow, config);
 });
 
@@ -38,15 +36,11 @@ ipcMain.handle('madara-stop', async () => {
   await Madara.stop();
 });
 
-ipcMain.handle('madara-delete', async () => {
-  await Madara.deleteNode();
-});
-
-ipcMain.handle('madara-setup', async (event, config: MadaraConfig) => {
+ipcMain.handle('madara-setup', async (event, config: Madara.MadaraConfig) => {
   await Madara.setup(mainWindow as BrowserWindow, config);
 });
 
-ipcMain.handle('release-exists', (event, config: MadaraConfig) => {
+ipcMain.handle('release-exists', (event, config: Madara.MadaraConfig) => {
   return Madara.releaseExists(config);
 });
 
@@ -69,22 +63,6 @@ ipcMain.handle('send-tweet', async () => {
 
 ipcMain.handle('child-process-in-memory', (): boolean => {
   return Madara.childProcessInMemory();
-});
-
-ipcMain.handle('madara-app-download', async (event, appId: string) => {
-  await MadaraApp.downloadApp(mainWindow as BrowserWindow, appId);
-});
-
-ipcMain.handle('madara-installed-apps', () => {
-  return MadaraApp.getInstalledApps();
-});
-
-ipcMain.handle('madara-app-start', (event, appId: string) => {
-  return MadaraApp.startApp(mainWindow as BrowserWindow, appId);
-});
-
-ipcMain.handle('madara-app-stop', (event, appId: string) => {
-  return MadaraApp.stopApp(mainWindow as BrowserWindow, appId);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -137,7 +115,6 @@ const createWindow = async () => {
     },
   });
 
-  console.log('this is the resolved - ', resolveHtmlPath('index.html'));
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -149,25 +126,9 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
-
-    // madara explorer ha some custom x-frame-options header that prevents it from being
-    // loaded, this code ensures the iframe loads
-    mainWindow.webContents.session.webRequest.onHeadersReceived(
-      { urls: ['*://*/*'] },
-      (details, callback) => {
-        if (details && details.responseHeaders) {
-          if (details.responseHeaders['X-Frame-Options']) {
-            delete details.responseHeaders['X-Frame-Options'];
-          } else if (details.responseHeaders['x-frame-options']) {
-            delete details.responseHeaders['x-frame-options'];
-          }
-        }
-        callback({ cancel: false, responseHeaders: details.responseHeaders });
-      }
-    );
   });
 
-  mainWindow.on('closed', async () => {
+  mainWindow.on('closed', () => {
     if (Madara.childProcessInMemory()) {
       Madara.stop();
     }
