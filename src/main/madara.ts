@@ -5,22 +5,21 @@ import fs from 'fs';
 import _ from 'lodash';
 import path from 'path';
 import sharp from 'sharp';
-import { MADARA_APP_PATH, NODE_CONFIG_DIRECTORY } from './constants';
+import { MADARA_APP_PATH } from './constants';
 import { MadaraConfig } from './types';
 
-const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
+const MADARA_APP_ROOT_FOLDER = '.madara-app';
+const RELEASES_FOLDER = `${app.getPath(
+  'home'
+)}/${MADARA_APP_ROOT_FOLDER}/releases`;
 
 // we download the chain specs for now because of an issue in the binaries
 // we can skip this step once this is fixed -  https://github.com/keep-starknet-strange/madara/issues/728
 const CHAIN_SPECS_FOLDER = `${app.getPath('home')}/.madara/chain-specs`;
-const CHAIN_DB_FOLDER = `${MADARA_APP_PATH}/data`;
 
 // TODO: update this once we have binary releases on Madara
 const GIT_RELEASE_BASE_PATH =
-  'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/releases';
-
-const EQUALITY_FLAGS = ['RPCMethods', 'RPCCors'];
-const BOOLEAN_FLAGS = ['RPCExternal', 'developmentMode'];
+  'https://raw.githubusercontent.com/apoorvsadana/madara-app/main/config/releases';
 
 const SETUP_FILES = [
   {
@@ -34,7 +33,7 @@ const SETUP_FILES = [
     showProgress: false,
   },
   {
-    url: `${GIT_RELEASE_BASE_PATH}/<%= release %>`, // release is replaced by the config
+    url: `${GIT_RELEASE_BASE_PATH}/<%= git_tag %>`, // git_tag is replaced by the config
     directory: RELEASES_FOLDER,
     showProgress: true,
   },
@@ -119,39 +118,16 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
-  const args = ['--base-path', CHAIN_DB_FOLDER];
-  Object.keys(config).forEach((eachKey) => {
-    // get value from node config input by user
-    const value = config[eachKey as keyof MadaraConfig];
-
-    // return if no value present in config
-    if (!value) return;
-
-    // get argument name for cmd line
-    const argumentName =
-      NODE_CONFIG_DIRECTORY[eachKey as keyof typeof NODE_CONFIG_DIRECTORY];
-
-    // if boolean flag then add argument name only
-    if (BOOLEAN_FLAGS.includes(eachKey)) {
-      // check if string value is true
-      if (value === 'true') {
-        args.push(argumentName);
-      }
-    }
-
-    // add argument name with config value
-    else if (EQUALITY_FLAGS.includes(eachKey)) {
-      args.push(`${argumentName}=${value}`);
-    }
-
-    // add value with argument name
-    else if (eachKey !== 'release') {
-      args.push(argumentName);
-      args.push(value);
-    }
-  });
-
-  console.log('these are the args - ', args, config);
+  const args = [
+    '--testnet',
+    'sharingan',
+    '--telemetry-url',
+    'wss://telemetry.madara.zone/submit 0',
+  ];
+  if (config.name) {
+    args.push('--name');
+    args.push(config.name);
+  }
 
   const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath
@@ -169,7 +145,6 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
   childProcess.on('close', () => {
     try {
       window.webContents.send('node-stop');
-      childProcess = undefined;
     } catch (err) {
       // if the user has closed the window then this emit won't work and it throws an error dialog, hence try catch
     }
@@ -179,20 +154,10 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
 export async function stop() {
   // stop the child process
   if (!childProcess) {
-    // return safely if nothing is running
-    return;
+    throw Error('No child process is running!');
   }
   childProcess.kill();
   childProcess = undefined;
-}
-
-export async function deleteNode() {
-  // stop the child process
-  await stop();
-  // delete the releases folder
-  if (fs.existsSync(CHAIN_DB_FOLDER)) {
-    fs.rmdirSync(CHAIN_DB_FOLDER, { recursive: true });
-  }
 }
 
 export function childProcessInMemory(): boolean {

@@ -4,14 +4,9 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  configTypes,
-  selectConfig,
-  setConfig,
-} from 'renderer/features/nodeSlice';
+import Select from 'react-select';
+import { selectConfig, setConfig } from 'renderer/features/nodeSlice';
 import { styled } from 'styled-components';
-import StyledSelect from './Dropdown';
-import Input from './Input';
 
 const SettingsContainer = styled(motion.div)`
   display: flex;
@@ -20,19 +15,13 @@ const SettingsContainer = styled(motion.div)`
   height: 95%;
   width: 30%;
   position: fixed;
-  right: 0rem;
+  right: 2rem;
   border-radius: 20px;
   z-index: 1;
   padding-left: 2rem;
   padding-right: 2rem;
   padding-top: 2rem;
   border: 1px solid #2d2d2d;
-`;
-
-const ContentContainer = styled.div`
-  height: 100%;
-  overflow-y: scroll;
-  margin-bottom: 2rem;
 `;
 
 const OpacityContainer = styled(motion.div)`
@@ -54,7 +43,17 @@ const MainHeading = styled.div`
 const SettingContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-top: 1.5rem;
+  .react-select__option {
+    color: white;
+  }
+  .react-select__option--is-selected {
+    color: #e62600;
+    background-color: rgba(230, 38, 0, 0.17);
+  }
+
+  .react-select__option--is-active {
+    background-color: transparent;
+  }
 `;
 
 const SettingHeading = styled.div`
@@ -71,26 +70,8 @@ const CloseButton = styled.div`
 
 export default function Settings({ onClose }: { onClose: any }) {
   const [releases, setReleases] = useState([]);
-
-  const booleanValues = [
-    { value: 'true', label: 'true' },
-    { value: 'false', label: 'false' },
-  ];
-
-  const RPCMethods = [
-    { value: 'unsafe', label: 'unsafe' },
-    { value: 'safe', label: 'safe' },
-    { value: 'auto', label: 'auto' },
-  ];
-
   const nodeConfig = useSelector(selectConfig);
   const dispatch = useDispatch();
-
-  const configKeyUpdate = (key: configTypes, value: any) => {
-    const newConfig: any = { ...nodeConfig };
-    newConfig[key] = value;
-    dispatch(setConfig(newConfig));
-  };
 
   useEffect(() => {
     (async () => {
@@ -104,6 +85,12 @@ export default function Settings({ onClose }: { onClose: any }) {
       );
     })();
   }, []);
+
+  const configKeyUpdate = (key: string, value: any) => {
+    const newConfig: any = { ...nodeConfig };
+    newConfig[key] = value;
+    dispatch(setConfig(newConfig));
+  };
 
   return (
     <>
@@ -121,172 +108,44 @@ export default function Settings({ onClose }: { onClose: any }) {
           <FontAwesomeIcon icon={faClose} color="white" size="xl" />
         </CloseButton>
         <MainHeading>Settings</MainHeading>
-
-        <ContentContainer>
-          <SettingContainer>
-            {/* Releases */}
-            <SettingHeading>Release</SettingHeading>
-            <StyledSelect
-              options={releases}
-              value={{
-                value: nodeConfig.release,
-                label: nodeConfig.release,
-              }}
-              onChange={(value: any) => configKeyUpdate('release', value.value)}
-            />
-          </SettingContainer>
-
-          {/* testnet */}
-          <SettingContainer>
-            <SettingHeading>Testnet</SettingHeading>
-            <Input
-              value={nodeConfig.testnet}
-              placeholder="Testnet name"
-              style={{
-                fontSize: '1rem',
+        <SettingContainer>
+          <SettingHeading>Release</SettingHeading>
+          <Select
+            options={releases}
+            value={{ value: nodeConfig.git_tag, label: nodeConfig.git_tag }}
+            styles={{
+              control: (baseStyles) => ({
+                ...baseStyles,
                 width: '100%',
-                textAlign: 'left',
                 marginTop: '1rem',
-              }}
-              onChange={(event) =>
-                configKeyUpdate('testnet', event.target.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* rpc-external */}
-          <SettingContainer>
-            <SettingHeading>RPC External</SettingHeading>
-            <StyledSelect
-              options={booleanValues}
-              value={{
-                value: nodeConfig.RPCExternal,
-                label: nodeConfig.RPCExternal,
-              }}
-              onChange={(value: any) =>
-                configKeyUpdate('RPCExternal', value.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* rpc-methods */}
-          <SettingContainer>
-            <SettingHeading>RPC Method</SettingHeading>
-            <StyledSelect
-              options={RPCMethods}
-              value={{
-                value: nodeConfig.RPCMethods,
-                label: nodeConfig.RPCMethods,
-              }}
-              onChange={(value: any) =>
-                configKeyUpdate('RPCMethods', value.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* rpc-port */}
-          <SettingContainer>
-            <SettingHeading>RPC Port</SettingHeading>
-            <Input
-              placeholder="Default Port Number is 9944"
-              style={{
-                fontSize: '1rem',
-                width: '100%',
-                textAlign: 'left',
-                marginTop: '1rem',
-              }}
-              value={nodeConfig.RPCPort}
-              onChange={(event) =>
-                configKeyUpdate('RPCPort', event.target.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* port */}
-          <SettingContainer>
-            <SettingHeading>Port</SettingHeading>
-            <Input
-              value={nodeConfig.port}
-              placeholder="Default Port Number is 10333"
-              style={{
-                fontSize: '1rem',
-                width: '100%',
-                textAlign: 'left',
-                marginTop: '1rem',
-              }}
-              onChange={(event) => configKeyUpdate('port', event.target.value)}
-            />
-          </SettingContainer>
-
-          {/* rpc-cors */}
-          <SettingContainer>
-            <SettingHeading>RPC CORS</SettingHeading>
-            <Input
-              placeholder="Enter CORS rules"
-              style={{
-                fontSize: '1rem',
-                width: '100%',
-                textAlign: 'left',
-                marginTop: '1rem',
-              }}
-              value={nodeConfig.RPCCors}
-              onChange={(event) =>
-                configKeyUpdate('RPCCors', event.target.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* development mode */}
-          <SettingContainer>
-            <SettingHeading>Development Mode</SettingHeading>
-            <StyledSelect
-              options={booleanValues}
-              value={{
-                value: nodeConfig.developmentMode,
-                label: nodeConfig.developmentMode,
-              }}
-              onChange={(value: any) =>
-                configKeyUpdate('developmentMode', value.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* bootnodes */}
-          <SettingContainer>
-            <SettingHeading>Bootnodes</SettingHeading>
-            <Input
-              value={nodeConfig.bootnodes}
-              placeholder="Enter bootnodes seperated by space"
-              style={{
-                fontSize: '1rem',
-                width: '100%',
-                textAlign: 'left',
-                marginTop: '1rem',
-              }}
-              onChange={(event) =>
-                configKeyUpdate('bootnodes', event.target.value)
-              }
-            />
-          </SettingContainer>
-
-          {/* telemetry-url */}
-          <SettingContainer>
-            <SettingHeading>Telemetry URL</SettingHeading>
-            <Input
-              value={nodeConfig.telemetryURL}
-              placeholder="Enter telemetry url with verbose level"
-              style={{
-                fontSize: '1rem',
-                width: '100%',
-                textAlign: 'left',
-                marginTop: '1rem',
-              }}
-              onChange={(event) =>
-                configKeyUpdate('telemetryURL', event.target.value)
-              }
-            />
-          </SettingContainer>
-        </ContentContainer>
+              }),
+            }}
+            className="react-select-container"
+            classNamePrefix="react-select"
+            theme={(theme) => ({
+              ...theme,
+              colors: {
+                ...theme.colors,
+                primary: '',
+                primary25: '',
+                primary50: '',
+                primary75: '',
+                neutral90: 'hsl(0, 0%, 100%)',
+                neutral80: 'hsl(0, 0%, 95%)',
+                neutral70: 'hsl(0, 0%, 90%)',
+                neutral60: 'hsl(0, 0%, 80%)',
+                neutral50: 'hsl(0, 0%, 70%)',
+                neutral40: 'hsl(0, 0%, 60%)',
+                neutral30: 'hsl(0, 0%, 50%)',
+                neutral20: 'hsl(0, 0%, 40%)',
+                neutral10: 'hsl(0, 0%, 30%)',
+                neutral5: 'hsl(0, 0%, 20%)',
+                neutral0: 'hsl(0, 0%, 10%)',
+              },
+            })}
+            onChange={(value: any) => configKeyUpdate('git_tag', value.value)}
+          />
+        </SettingContainer>
       </SettingsContainer>
     </>
   );
