@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { toast, ToastOptions } from 'react-toastify';
-import defaultToastStyleOptions from 'renderer/utils/constants';
+import defaultToastStyleOptions from 'shared/constants';
 
 const initialState = {
   isVisible: false,

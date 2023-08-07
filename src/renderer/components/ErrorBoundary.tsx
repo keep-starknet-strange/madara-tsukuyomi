@@ -1,6 +1,6 @@
 import React from 'react';
 import { toast } from 'react-toastify';
-import defaultToastStyleOptions from 'renderer/utils/constants';
+import defaultToastStyleOptions from 'shared/constants';
 
 interface Props {
   children: React.ReactNode;
