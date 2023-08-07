@@ -86,7 +86,6 @@ export async function setup(window: BrowserWindow, config: MadaraConfig) {
 
   const notDownloadedFiles = getNotDownloadedFiles(config);
 
-  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < notDownloadedFiles.length; i++) {
     const file = notDownloadedFiles[i];
     const opts: {

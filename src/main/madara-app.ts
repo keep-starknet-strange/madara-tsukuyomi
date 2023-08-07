@@ -1,6 +1,4 @@
-/* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-use-before-define */
 import { ChildProcess, exec, execSync } from 'child_process';
 import { BrowserWindow } from 'electron';
 import { download } from 'electron-dl';

@@ -1,7 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { getStore } from 'renderer/store/storeRegistry';
 
-const initialState = {
+type InstalledApps = { [appId: string]: boolean };
+type RunningApps = { [appId: string]: boolean };
+const initialState: {
+  installedApps: InstalledApps;
+  runningApps: RunningApps;
+} = {
   installedApps: {},
   runningApps: {},
 };
@@ -22,8 +27,9 @@ export const appsSlice = createSlice({
 
 export const { setInstalledApps, setRunningApps } = appsSlice.actions;
 
-export const selectInstalledApps = (state: any) => state.apps.installedApps;
-export const selectRunningApps = (state: any) => {
+export const selectInstalledApps = (state: any): InstalledApps =>
+  state.apps.installedApps;
+export const selectRunningApps = (state: any): RunningApps => {
   return state.apps.runningApps;
 };
 
@@ -43,6 +49,15 @@ export const setupInstalledApps = () => async (dispatch: any) => {
   const installedApps =
     await window.electron.ipcRenderer.madaraApp.installedApps();
   dispatch(setInstalledApps(installedApps));
+};
+
+export const closeAllApps = () => async (dispatch: any, getState: any) => {
+  const runningApps = selectRunningApps(getState());
+  Object.entries(runningApps).forEach(([appId, isRunning]) => {
+    if (isRunning) {
+      window.electron.ipcRenderer.madaraApp.stopApp(appId);
+    }
+  });
 };
 
 // listener to know when an app is running

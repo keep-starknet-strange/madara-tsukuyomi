@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import { createSlice } from '@reduxjs/toolkit';
 import * as starknet from 'starknet';
 import erc20Abi from '../../../config/abi/erc20.json';

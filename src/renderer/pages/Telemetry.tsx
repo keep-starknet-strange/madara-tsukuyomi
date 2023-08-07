@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import InfiniteBarLoader from 'renderer/components/InfiniteBarLoader';
+import { selectConfig } from 'renderer/features/nodeSlice';
+import { useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
 
 const TelemetryContainer = styled.div`
@@ -39,15 +41,11 @@ const BANNER_SEEN_KEY = 'banner_seen';
 export default function Telemetry() {
   const [loading, setLoading] = useState(true);
   const [isBannerVisible, setIsBannerVisible] = useState(false);
+  const nodeConig = useAppSelector(selectConfig);
 
   useEffect(() => {
-    const bannerSeen = sessionStorage.getItem(BANNER_SEEN_KEY);
-    if (bannerSeen === 'true') {
-      setIsBannerVisible(false);
-    } else {
-      setIsBannerVisible(true);
-      setTimeout(() => setIsBannerVisible(false), 5000);
-    }
+    setIsBannerVisible(true);
+    setTimeout(() => setIsBannerVisible(false), 5000);
   }, []);
 
   const handleLoad = () => {
@@ -76,8 +74,10 @@ export default function Telemetry() {
             exit={{ y: '200%' }}
           >
             <Banner>
-              It can take a few minutes for your node to reflect here. Kindly
-              check the Logs for any errors
+              {nodeConig.testnet !== 'sharingan'
+                ? `You must set the testnet to "sharingan" to see your node here.`
+                : `It can take a few minutes for your node to reflect here. Kindly
+              check the Logs for any errors`}
             </Banner>
           </BannerContainer>
         )}

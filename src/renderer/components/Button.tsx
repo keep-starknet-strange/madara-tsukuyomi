@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { styled } from 'styled-components';
 
 const ButtonContainer = styled.button`

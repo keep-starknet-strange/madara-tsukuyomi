@@ -13,6 +13,10 @@ module.exports = {
     '@typescript-eslint/no-shadow': 'error',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
+    'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
+    'react/require-default-props': 'off',
+    'no-use-before-define': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,

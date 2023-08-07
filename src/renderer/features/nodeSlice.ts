@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { MadaraConfig } from 'main/types';
 import { getStore } from 'renderer/store/storeRegistry';
+import { closeAllApps } from './appsSlice';
 
 export type configTypes =
   | 'RPCCors'
@@ -106,6 +107,7 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
 export const deleteNode = () => async (dispatch: any) => {
   dispatch(setIsRunning(false));
   dispatch(setLogs(''));
+  dispatch(closeAllApps());
   await window.electron.ipcRenderer.madara.delete();
 };
 

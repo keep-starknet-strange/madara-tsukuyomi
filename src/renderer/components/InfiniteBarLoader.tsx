@@ -1,5 +1,4 @@
 // taken from here https://csslayout.io/indeterminate-progress-bar/
-/* eslint-disable react/require-default-props */
 
 import { CSSProperties } from 'react';
 import { styled } from 'styled-components';
