@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { toast, ToastOptions } from 'react-toastify';
+import defaultToastStyleOptions from 'renderer/utils/constants';
 
 const initialState = {
   isVisible: false,
@@ -24,12 +25,7 @@ const { showToast, hideToast } = snackbarSlice.actions;
 export const showSnackbar = (message?: string) => (dispatch: any) => {
   dispatch(showToast());
   const TOAST_STYLE: ToastOptions = {
-    position: 'bottom-center',
-    hideProgressBar: true,
-    closeOnClick: false,
-    pauseOnHover: false,
-    draggable: false,
-    theme: 'dark',
+    ...defaultToastStyleOptions,
     autoClose: 2000,
   };
   toast(message ?? 'Something went wrong', { ...TOAST_STYLE });

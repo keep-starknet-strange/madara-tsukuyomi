@@ -1,5 +1,6 @@
 import React from 'react';
-import { toast, ToastOptions } from 'react-toastify';
+import { toast } from 'react-toastify';
+import defaultToastStyleOptions from 'renderer/utils/constants';
 
 interface Props {
   children: React.ReactNode;
@@ -19,24 +20,16 @@ class ErrorBoundary extends React.Component<Props, State> {
     return { error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any): void {
-    // add our error logging service here
-    // errorLoggingService(error,errorInfo)
-  }
+  // componentDidCatch(error: Error, errorInfo: any): void {
+  //   // add our error logging service here
+  //   // errorLoggingService(error,errorInfo)
+  // }
 
   render(): React.ReactNode {
     const { children } = this.props;
     const { error } = this.state;
     if (error) {
-      const TOAST_STYLE: ToastOptions = {
-        position: 'bottom-center',
-        hideProgressBar: true,
-        closeOnClick: false,
-        pauseOnHover: false,
-        draggable: false,
-        theme: 'dark',
-      };
-      toast('Something went wrong', { ...TOAST_STYLE });
+      toast('Something went wrong', defaultToastStyleOptions);
     }
 
     return children;
