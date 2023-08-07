@@ -12,6 +12,7 @@ import {
 import { styled } from 'styled-components';
 import StyledSelect from './Dropdown';
 import Input from './Input';
+import { MADARA_RELEASES_URL } from '../../../config/constants';
 
 const SettingsContainer = styled(motion.div)`
   display: flex;
@@ -94,9 +95,7 @@ export default function Settings({ onClose }: { onClose: any }) {
 
   useEffect(() => {
     (async () => {
-      const response = await axios.get(
-        'https://api.github.com/repos/keep-starknet-strange/madara/releases'
-      );
+      const response = await axios.get(MADARA_RELEASES_URL);
       setReleases(
         response.data.map((release: any) => {
           return { value: release.name, label: release.name };

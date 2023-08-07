@@ -46,7 +46,7 @@ ipcMain.handle('madara-setup', async (event, config: MadaraConfig) => {
   await Madara.setup(mainWindow as BrowserWindow, config);
 });
 
-ipcMain.handle('release-exists', (event, config: MadaraConfig) => {
+ipcMain.handle('release-exists', async (event, config: MadaraConfig) => {
   return Madara.releaseExists(config);
 });
 
