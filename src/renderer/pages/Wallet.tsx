@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 import Button from 'renderer/components/Button';
 import Input from 'renderer/components/Input';

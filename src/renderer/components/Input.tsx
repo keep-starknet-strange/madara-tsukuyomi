@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import React, { CSSProperties } from 'react';
 import { styled } from 'styled-components';
 

@@ -86,7 +86,6 @@ export async function setup(window: BrowserWindow, config: MadaraConfig) {
 
   const notDownloadedFiles = getNotDownloadedFiles(config);
 
-  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < notDownloadedFiles.length; i++) {
     const file = notDownloadedFiles[i];
     const opts: {
@@ -150,8 +149,6 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
       args.push(value);
     }
   });
-
-  console.log('these are the args - ', args, config);
 
   const execPath = `${RELEASES_FOLDER}/${config.release}`;
   // if the os is linux or mac then get access to execPath

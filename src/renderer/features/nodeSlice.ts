@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { MadaraConfig } from 'main/types';
 import { getStore } from 'renderer/store/storeRegistry';
+import { closeAllApps } from './appsSlice';
 
 export type configTypes =
   | 'RPCCors'
@@ -28,7 +29,7 @@ const initialState = {
     bootnodes: '',
     testnet: 'sharingan',
     name: '',
-    release: 'v0.1.0-testnet-sharingan-beta.8.2',
+    release: 'v0.1.0-testnet-sharingan-beta.7',
     developmentMode: 'false',
   },
   setupComplete: false,
@@ -103,9 +104,10 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
   dispatch(setIsRunning(false));
 };
 
-export const deleteNode = () => async (dispatch: any, getState: any) => {
+export const deleteNode = () => async (dispatch: any) => {
   dispatch(setIsRunning(false));
   dispatch(setLogs(''));
+  dispatch(closeAllApps());
   await window.electron.ipcRenderer.madara.delete();
 };
 
