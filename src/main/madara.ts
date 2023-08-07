@@ -1,12 +1,14 @@
 import { ChildProcessWithoutNullStreams, spawn, execSync } from 'child_process';
 import { BrowserWindow, app } from 'electron';
-import { download } from 'electron-dl';
+import { Options, download } from 'electron-dl';
 import fs from 'fs';
-import _ from 'lodash';
 import path from 'path';
 import sharp from 'sharp';
+import axios from 'axios';
+import _ from 'lodash';
 import { MADARA_APP_PATH, NODE_CONFIG_DIRECTORY } from './constants';
 import { MadaraConfig } from './types';
+import { MADARA_RELEASES_URL } from '../../config/constants';
 
 const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
 
@@ -14,10 +16,6 @@ const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
 // we can skip this step once this is fixed -  https://github.com/keep-starknet-strange/madara/issues/728
 const CHAIN_SPECS_FOLDER = `${app.getPath('home')}/.madara/chain-specs`;
 const CHAIN_DB_FOLDER = `${MADARA_APP_PATH}/data`;
-
-// TODO: update this once we have binary releases on Madara
-const GIT_RELEASE_BASE_PATH =
-  'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/main/config/releases';
 
 const EQUALITY_FLAGS = ['RPCMethods', 'RPCCors'];
 const BOOLEAN_FLAGS = ['RPCExternal', 'developmentMode'];
@@ -27,28 +25,75 @@ const SETUP_FILES = [
     url: `https://raw.githubusercontent.com/keep-starknet-strange/madara/main/crates/node/chain-specs/testnet-sharingan.json`,
     directory: CHAIN_SPECS_FOLDER,
     showProgress: false,
+    saveFilename: 'testnet-sharingan.json',
   },
   {
     url: `https://raw.githubusercontent.com/keep-starknet-strange/madara/main/crates/node/chain-specs/testnet-sharingan-raw.json`,
     directory: CHAIN_SPECS_FOLDER,
     showProgress: false,
+    saveFilename: 'testnet-sharingan-raw.json',
   },
   {
-    url: `${GIT_RELEASE_BASE_PATH}/<%= release %>`, // release is replaced by the config
+    url: getReleaseUrl,
     directory: RELEASES_FOLDER,
     showProgress: true,
+    saveFilename: '<%= release %>', // release is replaced by the config
   },
 ];
 
-function getSetupFiles(config: MadaraConfig) {
-  return SETUP_FILES.map((file) => {
-    const url = _.template(file.url)(config);
+async function getReleaseUrl(config: MadaraConfig): Promise<string> {
+  const response = await axios.get(MADARA_RELEASES_URL);
+  const releases: {
+    tag_name: string;
+    assets: { browser_download_url: string; name: string }[];
+  }[] = response.data;
+  const release = releases.filter((r) => r.tag_name === config.release)[0];
+
+  const { platform, arch } = process;
+  let assetName = '';
+
+  if (platform === 'darwin') {
+    if (arch === 'arm64') {
+      assetName = 'aarch64-apple-darwin-madara';
+    } else if (arch === 'x64') {
+      assetName = 'x86_64-apple-darwin-madara';
+    }
+  } else if (platform === 'linux') {
+    if (arch === 'arm64') {
+      assetName = 'aarch64-unknown-linux-gnu-madara';
+    } else if (arch === 'x64') {
+      assetName = 'x86_64-unknown-linux-gnu-madara';
+    }
+  } else if (platform === 'win32') {
+    if (arch === 'x64') {
+      assetName = 'x86_64-pc-windows-msvc-madara.exe';
+    }
+  }
+
+  if (assetName === '') {
+    throw new Error(
+      `Platform: ${platform} and Architecture: ${arch} is not supported`
+    );
+  }
+  return release.assets.filter((a) => a.name === assetName)[0]
+    .browser_download_url;
+}
+
+async function getSetupFiles(config: MadaraConfig, fetchUrls: boolean) {
+  const promises = SETUP_FILES.map(async (file) => {
+    let url;
+    if (_.isFunction(file.url) && fetchUrls) {
+      url = await file.url(config);
+    } else {
+      url = file.url;
+    }
     return {
       ...file,
       url,
-      filename: url.split('/').pop(),
+      filename: _.template(file.saveFilename)(config),
     };
   });
+  return Promise.all(promises);
 }
 
 export async function getCurrentWindowScreenshot(win: BrowserWindow) {
@@ -64,8 +109,11 @@ export async function getCurrentWindowScreenshot(win: BrowserWindow) {
   }
 }
 
-const getNotDownloadedFiles = (config: MadaraConfig) => {
-  const setupFiles = getSetupFiles(config);
+const getNotDownloadedFiles = async (
+  config: MadaraConfig,
+  fetchUrls: boolean
+) => {
+  const setupFiles = await getSetupFiles(config, fetchUrls);
   return setupFiles.filter((file) => {
     const fileDir = file.directory;
     if (!fs.existsSync(`${fileDir}/${file.filename}`)) {
@@ -75,29 +123,30 @@ const getNotDownloadedFiles = (config: MadaraConfig) => {
   });
 };
 
-export function releaseExists(config: MadaraConfig): boolean {
-  return getNotDownloadedFiles(config).length === 0;
+export async function releaseExists(config: MadaraConfig): Promise<boolean> {
+  return (await getNotDownloadedFiles(config, false)).length === 0;
 }
 
 export async function setup(window: BrowserWindow, config: MadaraConfig) {
-  if (releaseExists(config)) {
+  if (await releaseExists(config)) {
     return;
   }
 
-  const notDownloadedFiles = getNotDownloadedFiles(config);
+  const notDownloadedFiles = await getNotDownloadedFiles(config, true);
 
   for (let i = 0; i < notDownloadedFiles.length; i++) {
     const file = notDownloadedFiles[i];
-    const opts: {
-      directory: string;
-      saveAs: boolean;
-      overwrite: boolean;
-      onProgress: any;
-    } = {
+    type DownoadOptionsModifiable = {
+      -readonly [K in keyof Options]: K extends 'propertyName'
+        ? string
+        : Options[K];
+    };
+    const opts: DownoadOptionsModifiable = {
       directory: file.directory,
       saveAs: false,
       overwrite: true,
       onProgress: undefined,
+      filename: file.filename,
     };
     if (file.showProgress) {
       opts.onProgress = (progress: any) => {
