@@ -4,6 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import appsReducer from '../features/appsSlice';
 import nodeReducer from '../features/nodeSlice';
 import walletReducer from '../features/walletSlice';
+import snackbarReducer from './snackbar';
 
 const persistConfig = {
   key: 'root',
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   node: nodeReducer,
   wallet: walletReducer,
   apps: appsReducer,
+  snackbar: snackbarReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

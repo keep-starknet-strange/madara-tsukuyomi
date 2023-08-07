@@ -10,6 +10,7 @@ import {
   startNode,
   stopNode,
 } from 'renderer/features/nodeSlice';
+import { showSnackbar } from 'renderer/store/snackbar';
 import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
 import Spinner from 'renderer/components/Spinner';
@@ -133,9 +134,14 @@ export default function Navigtion() {
   const runningApps = useAppSelector(selectRunningApps);
 
   const handleScreenshot = async () => {
-    setShowSpinner(true);
-    await window.electron.ipcRenderer.madara.sendTweet();
-    setShowSpinner(false);
+    try {
+      setShowSpinner(true);
+      await window.electron.ipcRenderer.madara.sendTweet();
+      setShowSpinner(false);
+    } catch (err) {
+      dispatch(showSnackbar());
+      setShowSpinner(false);
+    }
   };
 
   return (

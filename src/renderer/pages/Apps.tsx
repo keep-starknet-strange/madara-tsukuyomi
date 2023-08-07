@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Id, ToastContainer, ToastOptions, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Button from 'renderer/components/Button';
+import defaultToastStyleOptions from 'shared/constants';
 import {
   selectInstalledApps,
   selectRunningApps,
@@ -121,12 +122,8 @@ export default function Apps() {
       data: { appId: string; progress: Progress; filename: string }
     ) => {
       const TOAST_STYLE: ToastOptions = {
-        position: 'bottom-center',
+        ...defaultToastStyleOptions,
         hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: false,
-        draggable: false,
-        theme: 'dark',
         progressClassName: 'toast-progress-bar',
         autoClose: false,
       };
