@@ -116,43 +116,6 @@ export default function Apps() {
     window.electron.ipcRenderer.madaraApp.download(appId);
   };
 
-  window.electron.ipcRenderer.madaraApp.onAppDownloadProgress(
-    (
-      event: any,
-      data: { appId: string; progress: Progress; filename: string }
-    ) => {
-      const TOAST_STYLE: ToastOptions = {
-        ...defaultToastStyleOptions,
-        hideProgressBar: false,
-        progressClassName: 'toast-progress-bar',
-        autoClose: false,
-      };
-      if (toastRefs[data.appId] === undefined) {
-        toastRefs[data.appId] = {};
-      }
-      if (toastRefs[data.appId][data.filename] === undefined) {
-        toastRefs[data.appId][data.filename] = toast(
-          `Downloading ${data.filename}`,
-          {
-            ...TOAST_STYLE,
-            progress: data.progress.percent,
-          }
-        );
-      } else {
-        toast.update(toastRefs[data.appId][data.filename] as Id, {
-          ...TOAST_STYLE,
-          progress: data.progress.percent,
-        });
-      }
-    }
-  );
-
-  window.electron.ipcRenderer.madaraApp.onAppDownloadComplete(
-    (event: any, data: { appId: string }) => {
-      dispatch(setAppAsInstalled(data.appId));
-    }
-  );
-
   const handleAppStart = (appId: string) => {
     window.electron.ipcRenderer.madaraApp.startApp(appId);
   };
@@ -163,6 +126,43 @@ export default function Apps() {
 
   useEffect(() => {
     dispatch(setupInstalledApps());
+
+    window.electron.ipcRenderer.madaraApp.onAppDownloadProgress(
+      (
+        event: any,
+        data: { appId: string; progress: Progress; filename: string }
+      ) => {
+        const TOAST_STYLE: ToastOptions = {
+          ...defaultToastStyleOptions,
+          hideProgressBar: false,
+          progressClassName: 'toast-progress-bar',
+          autoClose: false,
+        };
+        if (toastRefs[data.appId] === undefined) {
+          toastRefs[data.appId] = {};
+        }
+        if (toastRefs[data.appId][data.filename] === undefined) {
+          toastRefs[data.appId][data.filename] = toast(
+            `Downloading ${data.filename}`,
+            {
+              ...TOAST_STYLE,
+              progress: data.progress.percent,
+            }
+          );
+        } else {
+          toast.update(toastRefs[data.appId][data.filename] as Id, {
+            ...TOAST_STYLE,
+            progress: data.progress.percent,
+          });
+        }
+      }
+    );
+
+    window.electron.ipcRenderer.madaraApp.onAppDownloadComplete(
+      (event: any, data: { appId: string }) => {
+        dispatch(setAppAsInstalled(data.appId));
+      }
+    );
   }, []);
 
   return (

@@ -1,4 +1,20 @@
-const APPS_CONFIG = {
+export type AppProperties = {
+  id: string;
+  appName: string;
+  appType: 'binary' | 'docker';
+  configParams: Record<string, string>;
+  files: {
+    name: string;
+    url: string;
+  }[];
+  showFrontend: boolean;
+  frontendUrl: string;
+  logoUrl: string;
+  postInstallationCommands: string[];
+  runCommamd: string[];
+};
+
+const APPS_CONFIG: { apps: AppProperties[] } = {
   apps: [
     {
       id: '5625b08e-ac19-49c9-b514-8ba7d12acd13',
@@ -71,22 +87,22 @@ const APPS_CONFIG = {
       ],
     },
     {
-      id: '20328678-1cec-4e84-a2ea-0b83cd84bece',
+      id: '6430cd1b-097d-46be-a44d-aa7631433910',
       appName: 'Getting Started',
       appType: 'docker',
       configParams: {},
       files: [
         {
-          name: 'chess',
-          url: 'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/app_demo/config/dojo_chess/deploy_files.zip',
+          name: 'getting_started',
+          url: 'https://raw.githubusercontent.com/apoorvsadana/madara-tsukuyomi/docker_apps/config/getting-started/docker-compose.yml',
         },
       ],
       showFrontend: false,
-      frontendUrl: 'http://localhost:8080',
+      frontendUrl: 'http://localhost:80',
       logoUrl:
         'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
       postInstallationCommands: [],
-      runCommamd: [],
+      runCommamd: ['docker-compose -f ./getting_started/docker-compose.yml up'],
     },
   ],
 };
