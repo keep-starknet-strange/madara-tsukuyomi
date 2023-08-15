@@ -83,9 +83,9 @@ async function getSetupFiles(config: MadaraConfig, fetchUrls: boolean) {
   const promises = SETUP_FILES.map(async (file) => {
     let url;
     if (_.isFunction(file.url) && fetchUrls) {
-      url = await file.url(config);
+      url = (await file.url(config)) as string;
     } else {
-      url = file.url;
+      url = file.url as string;
     }
     return {
       ...file,

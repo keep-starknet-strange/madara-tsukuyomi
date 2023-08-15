@@ -2,7 +2,7 @@
 import { ChildProcess, exec, execSync } from 'child_process';
 import { BrowserWindow } from 'electron';
 import { download } from 'electron-dl';
-import { readdirSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import APPS_CONFIG from '../../config/apps';
 import { MADARA_APP_PATH } from './constants';
 
@@ -11,8 +11,8 @@ const APP_PROCESSES: { [appId: string]: ChildProcess[] } = {};
 
 export async function downloadApp(window: BrowserWindow, appId: string) {
   const appConfig = APPS_CONFIG.apps.filter((app) => app.id === appId)[0];
-  for (let i = 0; i < appConfig.binaryFiles.length; i++) {
-    const binary = appConfig.binaryFiles[i];
+  for (let i = 0; i < appConfig.files.length; i++) {
+    const binary = appConfig.files[i];
     await download(window, binary.url, {
       directory: `${APPS_FOLDER}/${appId}/${binary.name}`,
       saveAs: false,
@@ -40,6 +40,10 @@ export async function downloadApp(window: BrowserWindow, appId: string) {
 
 export function getInstalledApps() {
   const installedApps: { [appId: string]: boolean } = {};
+  if (existsSync(APPS_FOLDER) === false) {
+    // create APPS_FOLDER directory
+    execSync(`mkdir -p ${APPS_FOLDER}`);
+  }
   readdirSync(APPS_FOLDER, { withFileTypes: true }).forEach((app) => {
     if (app.isDirectory()) {
       installedApps[app.name] = true;

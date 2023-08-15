@@ -3,8 +3,9 @@ const APPS_CONFIG = {
     {
       id: '5625b08e-ac19-49c9-b514-8ba7d12acd13',
       appName: 'Faucet',
+      appType: 'binary',
       configParams: {},
-      binaryFiles: [
+      files: [
         {
           name: 'frontend',
           url: 'https://github.com/keep-starknet-strange/madara-infra/releases/download/starknet-stack-precompiled-bins/starkcet-frontend',
@@ -30,8 +31,9 @@ const APPS_CONFIG = {
     {
       id: '4a4ffc33-d60e-49db-9f55-0c43815dcf86',
       appName: 'Madara Explorer',
+      appType: 'binary',
       configParams: {},
-      binaryFiles: [
+      files: [
         {
           name: 'explorer',
           url: 'https://github.com/keep-starknet-strange/madara-infra/releases/download/starknet-stack-precompiled-bins/madara-explorer.tar',
@@ -51,8 +53,9 @@ const APPS_CONFIG = {
     {
       id: '20328678-1cec-4e84-a2ea-0b83cd84bece',
       appName: 'Dojo Chess',
+      appType: 'binary',
       configParams: {},
-      binaryFiles: [
+      files: [
         {
           name: 'chess',
           url: 'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/app_demo/config/dojo_chess/deploy_files.zip',
@@ -66,6 +69,24 @@ const APPS_CONFIG = {
       runCommamd: [
         'sozo migrate --manifest-path ./chess/deploy_files/Scarb.toml',
       ],
+    },
+    {
+      id: '20328678-1cec-4e84-a2ea-0b83cd84bece',
+      appName: 'Getting Started',
+      appType: 'docker',
+      configParams: {},
+      files: [
+        {
+          name: 'chess',
+          url: 'https://raw.githubusercontent.com/keep-starknet-strange/madara-tsukuyomi/app_demo/config/dojo_chess/deploy_files.zip',
+        },
+      ],
+      showFrontend: false,
+      frontendUrl: 'http://localhost:8080',
+      logoUrl:
+        'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
+      postInstallationCommands: [],
+      runCommamd: [],
     },
   ],
 };
