@@ -31,12 +31,12 @@ const TabsContainer = styled.div`
   flex-direction: row;
   align-items: center;
   background-color: black;
-  height: 4vh;
+  height: 3vh;
 `;
 
 const Tab = styled.div`
   width: 25%;
-  font-size: 1rem;
+  font-size: 0.9rem;
   padding-top: 5px;
   padding-bottom: 5px;
   border-right: 1px solid #222;

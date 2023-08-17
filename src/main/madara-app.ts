@@ -124,14 +124,22 @@ async function startContainer(
   Object.entries(appSettings).forEach(([key, value]) =>
     Env.push(`${key}=${value}`)
   );
-  const container = await docker.createContainer({
+
+  const containerCreateOptions: ContainerCreateOptions = {
     ...containerConfigParsed,
     Env,
     AttachStdout: true,
     AttachStdin: true,
     AttachStderr: true,
     name: getContainerName(containerConfigParsed, appConfig),
-  });
+  };
+  if (appConfig.bind) {
+    containerCreateOptions.HostConfig = containerCreateOptions.HostConfig ?? {};
+    containerCreateOptions.HostConfig.Binds = [
+      `${APPS_FOLDER}/${appConfig.id}:/data`,
+    ];
+  }
+  const container = await docker.createContainer(containerCreateOptions);
   // create a write stream
 
   container.attach(

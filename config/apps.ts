@@ -162,12 +162,19 @@ const APPS_CONFIG: { apps: (BinaryAppProperties | DockerAppProperties)[] } = {
             ],
           },
         },
+        {
+          Image: 'apoorvsadana/pragma_publish',
+          Cmd: [],
+          name: 'pragma-publish',
+        },
       ],
       showFrontend: false,
       frontendUrl: 'http://localhost:80',
       logoUrl:
         'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
-      postInstallationCommands: [],
+      postInstallationCommands: [
+        'curl -O https://raw.githubusercontent.com/apoorvsadana/storage/main/pragma_price_dump.js',
+      ],
       settings: [
         {
           name: 'Supabase Url',
