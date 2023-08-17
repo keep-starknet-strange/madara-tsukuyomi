@@ -11,3 +11,9 @@ export type MadaraConfig = {
   release: string;
   developmentMode: string;
 };
+
+export type AppAppendLogs = {
+  appId: string;
+  logs: string;
+  containerName: string;
+};

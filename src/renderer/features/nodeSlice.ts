@@ -29,7 +29,7 @@ const initialState = {
     bootnodes: '',
     testnet: 'sharingan',
     name: '',
-    release: 'v0.1.0-testnet-sharingan-beta.7',
+    release: 'v0.1.0.experimental.3',
     developmentMode: 'false',
   },
   setupComplete: false,

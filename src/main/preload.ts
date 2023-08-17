@@ -34,6 +34,11 @@ const electronHandler = {
       startApp: (appId: string) =>
         ipcRenderer.invoke('madara-app-start', appId),
       stopApp: (appId: string) => ipcRenderer.invoke('madara-app-stop', appId),
+      onAppLogs: (callback: any) => ipcRenderer.on('app-logs', callback),
+      updateAppSettings: (appId: string, settings: any) =>
+        ipcRenderer.invoke('madara-app-update-settings', appId, settings),
+      getAppSettings: (appId: string) =>
+        ipcRenderer.invoke('madara-app-get-settings', appId),
     },
   },
 };

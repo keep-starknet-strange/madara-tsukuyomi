@@ -1,14 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { AppAppendLogs } from 'main/types';
 import { getStore } from 'renderer/store/storeRegistry';
 
 type InstalledApps = { [appId: string]: boolean };
 type RunningApps = { [appId: string]: boolean };
+export type AppLogs = { [appId: string]: { [containerName: string]: string } };
 const initialState: {
   installedApps: InstalledApps;
   runningApps: RunningApps;
+  appLogs: AppLogs;
 } = {
   installedApps: {},
   runningApps: {},
+  appLogs: {},
 };
 
 export const appsSlice = createSlice({
@@ -22,15 +26,29 @@ export const appsSlice = createSlice({
     setRunningApps: (state, data) => {
       state.runningApps = data.payload;
     },
+    appendAppLogs: (state, data) => {
+      if (!state.appLogs[data.payload.appId]) {
+        state.appLogs[data.payload.appId] = {};
+      }
+      if (!state.appLogs[data.payload.appId][data.payload.containerName]) {
+        state.appLogs[data.payload.appId][data.payload.containerName] = '';
+      }
+      state.appLogs[data.payload.appId][data.payload.containerName] +=
+        data.payload.logs;
+    },
   },
 });
 
-export const { setInstalledApps, setRunningApps } = appsSlice.actions;
+export const { setInstalledApps, setRunningApps, appendAppLogs } =
+  appsSlice.actions;
 
 export const selectInstalledApps = (state: any): InstalledApps =>
   state.apps.installedApps;
 export const selectRunningApps = (state: any): RunningApps => {
   return state.apps.runningApps;
+};
+export const selectAppLogs = (state: any): AppLogs => {
+  return state.apps.appLogs;
 };
 
 export const setAppAsInstalled =
@@ -71,6 +89,19 @@ window.electron.ipcRenderer.madaraApp.onAppStop(
   (event: any, data: { appId: string }) =>
     // @ts-ignore
     getStore().dispatch(updateAppRunningStatus(data.appId, false))
+);
+
+// listener to add logs for apps
+window.electron.ipcRenderer.madaraApp.onAppLogs(
+  (event: any, data: AppAppendLogs) => {
+    getStore().dispatch(
+      appendAppLogs({
+        appId: data.appId,
+        containerName: data.containerName,
+        logs: data.logs,
+      })
+    );
+  }
 );
 
 export default appsSlice.reducer;

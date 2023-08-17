@@ -19,11 +19,13 @@ export default function Input({
   style = {},
   onChange,
   value,
+  type = 'text',
 }: {
   placeholder?: string;
   style?: CSSProperties;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string | undefined;
+  type: string;
 }) {
   return (
     <InputContainer
@@ -33,6 +35,7 @@ export default function Input({
       }}
       placeholder={placeholder}
       onChange={onChange}
+      type={type}
     />
   );
 }

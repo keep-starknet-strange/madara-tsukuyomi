@@ -1,20 +1,41 @@
-export type AppProperties = {
+import { ContainerCreateOptions } from 'dockerode';
+
+export type AppSettings = {
+  name: string;
+  type: 'plaintext' | 'secret';
+  environmentName: string;
+  required: boolean;
+};
+
+export type CommonAppProperties = {
   id: string;
   appName: string;
   appType: 'binary' | 'docker';
   configParams: Record<string, string>;
-  files: {
-    name: string;
-    url: string;
-  }[];
   showFrontend: boolean;
   frontendUrl: string;
   logoUrl: string;
   postInstallationCommands: string[];
+  markdownDocsUrl?: string;
+  settings?: AppSettings[];
+};
+
+export type BinaryAppProperties = CommonAppProperties & {
+  files: {
+    name: string;
+    url: string;
+  }[];
+  appType: 'binary';
   runCommamd: string[];
 };
 
-const APPS_CONFIG: { apps: AppProperties[] } = {
+export type DockerAppProperties = CommonAppProperties & {
+  containers: ContainerCreateOptions[];
+  appType: 'docker';
+  bind: boolean;
+};
+
+const APPS_CONFIG: { apps: (BinaryAppProperties | DockerAppProperties)[] } = {
   apps: [
     {
       id: '5625b08e-ac19-49c9-b514-8ba7d12acd13',
@@ -88,13 +109,27 @@ const APPS_CONFIG: { apps: AppProperties[] } = {
     },
     {
       id: '6430cd1b-097d-46be-a44d-aa7631433910',
-      appName: 'Getting Started',
+      appName: 'Apibara Starknet',
       appType: 'docker',
       configParams: {},
-      files: [
+      containers: [
         {
-          name: 'getting_started',
-          url: 'https://raw.githubusercontent.com/apoorvsadana/madara-tsukuyomi/docker_apps/config/getting-started/docker-compose.yml',
+          Image: 'quay.io/apibara/starknet:1.1.0',
+          Cmd: [
+            'start',
+            '--data=/data',
+            '--rpc=http://host.docker.internal:9944', // TODO: make it work on any port
+          ],
+          name: 'apibara-starknet',
+          HostConfig: {
+            PortBindings: {
+              '7171/tcp': [
+                {
+                  HostPort: '7171',
+                },
+              ],
+            },
+          },
         },
       ],
       showFrontend: false,
@@ -102,7 +137,58 @@ const APPS_CONFIG: { apps: AppProperties[] } = {
       logoUrl:
         'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
       postInstallationCommands: [],
-      runCommamd: ['docker-compose -f ./getting_started/docker-compose.yml up'],
+      markdownDocsUrl:
+        'https://raw.githubusercontent.com/keep-starknet-strange/madara/main/README.md',
+      bind: false,
+    },
+    {
+      id: '5d4c83c6-40bc-4437-a31e-f51635f1d01e',
+      appName: 'Pragma Price Dump',
+      appType: 'docker',
+      configParams: {},
+      containers: [
+        {
+          Image: 'quay.io/apibara/sink-postgres:0.1.0',
+          Cmd: [
+            'run',
+            '/data/pragma_price_dump.js',
+            '--stream-url',
+            'http://host.docker.internal:7171',
+          ],
+          name: 'apibara-sink-postgres',
+          HostConfig: {
+            Binds: [
+              '<%= ELECTRON_APP_DIRECTORY %>/apps/<%= APP_ID %>/volume:/data',
+            ],
+          },
+        },
+      ],
+      showFrontend: false,
+      frontendUrl: 'http://localhost:80',
+      logoUrl:
+        'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
+      postInstallationCommands: [],
+      settings: [
+        {
+          name: 'Supabase Url',
+          type: 'plaintext',
+          environmentName: 'SUPABASE_URL',
+          required: true,
+        },
+        {
+          name: 'Supabase Anon Key',
+          type: 'secret',
+          environmentName: 'SUPABASE_ANON_KEY',
+          required: true,
+        },
+        {
+          name: 'Postgres Connection String',
+          type: 'plaintext',
+          environmentName: 'POSTGRES_CONNECTION_STRING',
+          required: true,
+        },
+      ],
+      bind: true,
     },
   ],
 };

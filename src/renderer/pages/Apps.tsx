@@ -1,4 +1,10 @@
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCog,
+  faInfo,
+  faPause,
+  faPlay,
+  faTerminal,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Progress } from 'electron-dl';
 import { useEffect, useState } from 'react';
@@ -14,7 +20,14 @@ import {
 } from 'renderer/features/appsSlice';
 import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import APPS_CONFIG from '../../../config/apps';
+import AppLogs from './AppLogs';
+import AppSideDrawer from './AppSideDrawer';
+import AppDocs from './AppDocs';
+import AppSettings from './AppSettings';
+import { showSnackbar } from 'renderer/store/snackbar';
 
 const AppsContainer = styled.div`
   height: 100%;
@@ -108,6 +121,8 @@ export default function Apps() {
   const [loading, setLoading] = useState<{ [appId: string]: boolean }>({});
   const installedApps = useAppSelector(selectInstalledApps);
   const runningApps = useAppSelector(selectRunningApps);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const dispatch = useAppDispatch();
 
@@ -116,7 +131,22 @@ export default function Apps() {
     window.electron.ipcRenderer.madaraApp.download(appId);
   };
 
-  const handleAppStart = (appId: string) => {
+  const handleAppStart = async (appId: string) => {
+    const appSettings =
+      await window.electron.ipcRenderer.madaraApp.getAppSettings(appId);
+    const appConfig = APPS_CONFIG.apps.find((app) => app.id === appId);
+    if (appConfig?.settings && appConfig.settings.length > 0) {
+      const missingSettings = appConfig.settings.filter(
+        (setting) => !appSettings[setting.environmentName]
+      );
+      if (missingSettings.length > 0) {
+        dispatch(
+          showSnackbar('Please enter the required variables in settings')
+        );
+        return;
+      }
+    }
+
     window.electron.ipcRenderer.madaraApp.startApp(appId);
   };
 
@@ -165,6 +195,10 @@ export default function Apps() {
     );
   }, []);
 
+  const closeDrawer = () => {
+    navigate('/navigation/apps');
+  };
+
   return (
     <AppsContainer>
       <Heading>Apps</Heading>
@@ -173,11 +207,18 @@ export default function Apps() {
           let appRightJsx;
           if (runningApps[app.id]) {
             appRightJsx = (
-              <FontAwesomeIcon
-                onClick={() => handleAppStop(app.id)}
-                icon={faPause}
-                style={{ cursor: 'pointer' }}
-              />
+              <>
+                <FontAwesomeIcon
+                  onClick={() => handleAppStop(app.id)}
+                  icon={faPause}
+                  style={{ cursor: 'pointer' }}
+                />
+                <FontAwesomeIcon
+                  onClick={() => navigate(`./logs/${app.id}`)}
+                  icon={faTerminal}
+                  style={{ cursor: 'pointer', marginLeft: '15px' }}
+                />
+              </>
             );
           } else if (installedApps[app.id]) {
             appRightJsx = (
@@ -205,12 +246,57 @@ export default function Apps() {
                 <AppLogo src={app.logoUrl} />
                 <AppTitle>{app.appName}</AppTitle>
               </AppRowLeft>
-              <AppRowRight>{appRightJsx}</AppRowRight>
+              <AppRowRight>
+                {appRightJsx}
+                {app.settings && app.settings.length > 0 && (
+                  <FontAwesomeIcon
+                    onClick={() => navigate(`./settings/${app.id}`)}
+                    icon={faCog}
+                    style={{ cursor: 'pointer', marginLeft: '15px' }}
+                  />
+                )}
+                {app.markdownDocsUrl && (
+                  <FontAwesomeIcon
+                    icon={faInfo}
+                    style={{ cursor: 'pointer', marginLeft: '15px' }}
+                    onClick={() => navigate(`./docs/${app.id}`)}
+                  />
+                )}
+              </AppRowRight>
             </AppRow>
           );
         })}
       </AppRows>
       <ToastContainer />
+
+      <AnimatePresence>
+        <Routes key={location.pathname} location={location}>
+          <Route
+            path="/logs/:appId"
+            element={
+              <AppSideDrawer>
+                <AppLogs close={closeDrawer} />
+              </AppSideDrawer>
+            }
+          />
+          <Route
+            path="/docs/:appId"
+            element={
+              <AppSideDrawer>
+                <AppDocs close={closeDrawer} />
+              </AppSideDrawer>
+            }
+          />
+          <Route
+            path="/settings/:appId"
+            element={
+              <AppSideDrawer>
+                <AppSettings close={closeDrawer} />
+              </AppSideDrawer>
+            }
+          />
+        </Routes>
+      </AnimatePresence>
     </AppsContainer>
   );
 }
