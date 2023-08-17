@@ -88,6 +88,17 @@ ipcMain.handle('madara-app-stop', (event, appId: string) => {
   return MadaraApp.stopApp(mainWindow as BrowserWindow, appId);
 });
 
+ipcMain.handle(
+  'madara-app-update-settings',
+  (event, appId: string, settings: any) => {
+    return MadaraApp.updateAppSettings(appId, settings);
+  }
+);
+
+ipcMain.handle('madara-app-get-settings', (event, appId: string) => {
+  return MadaraApp.getAppSettings(appId);
+});
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
@@ -138,7 +149,6 @@ const createWindow = async () => {
     },
   });
 
-  console.log('this is the resolved - ', resolveHtmlPath('index.html'));
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {

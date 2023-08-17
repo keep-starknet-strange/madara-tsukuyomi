@@ -239,7 +239,7 @@ export default function Navigtion() {
       <ContentContainer>
         <Routes>
           {NAVBAR_ITEMS.map((item) => (
-            <Route path={`/${item.path}`} element={item.component} />
+            <Route path={`/${item.path}/*`} element={item.component} />
           ))}
           <Route path="/apps/:appId" element={<AppViewer />} />
         </Routes>

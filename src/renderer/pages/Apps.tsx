@@ -1,4 +1,10 @@
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCog,
+  faInfo,
+  faPause,
+  faPlay,
+  faTerminal,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Progress } from 'electron-dl';
 import { useEffect, useState } from 'react';
@@ -14,7 +20,14 @@ import {
 } from 'renderer/features/appsSlice';
 import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
+import { AnimatePresence } from 'framer-motion';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import APPS_CONFIG from '../../../config/apps';
+import AppLogs from './AppLogs';
+import AppSideDrawer from './AppSideDrawer';
+import AppDocs from './AppDocs';
+import AppSettings from './AppSettings';
+import { showSnackbar } from 'renderer/store/snackbar';
 
 const AppsContainer = styled.div`
   height: 100%;
@@ -108,6 +121,8 @@ export default function Apps() {
   const [loading, setLoading] = useState<{ [appId: string]: boolean }>({});
   const installedApps = useAppSelector(selectInstalledApps);
   const runningApps = useAppSelector(selectRunningApps);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const dispatch = useAppDispatch();
 
@@ -116,44 +131,22 @@ export default function Apps() {
     window.electron.ipcRenderer.madaraApp.download(appId);
   };
 
-  window.electron.ipcRenderer.madaraApp.onAppDownloadProgress(
-    (
-      event: any,
-      data: { appId: string; progress: Progress; filename: string }
-    ) => {
-      const TOAST_STYLE: ToastOptions = {
-        ...defaultToastStyleOptions,
-        hideProgressBar: false,
-        progressClassName: 'toast-progress-bar',
-        autoClose: false,
-      };
-      if (toastRefs[data.appId] === undefined) {
-        toastRefs[data.appId] = {};
-      }
-      if (toastRefs[data.appId][data.filename] === undefined) {
-        toastRefs[data.appId][data.filename] = toast(
-          `Downloading ${data.filename}`,
-          {
-            ...TOAST_STYLE,
-            progress: data.progress.percent,
-          }
+  const handleAppStart = async (appId: string) => {
+    const appSettings =
+      await window.electron.ipcRenderer.madaraApp.getAppSettings(appId);
+    const appConfig = APPS_CONFIG.apps.find((app) => app.id === appId);
+    if (appConfig?.settings && appConfig.settings.length > 0) {
+      const missingSettings = appConfig.settings.filter(
+        (setting) => !appSettings[setting.environmentName]
+      );
+      if (missingSettings.length > 0) {
+        dispatch(
+          showSnackbar('Please enter the required variables in settings')
         );
-      } else {
-        toast.update(toastRefs[data.appId][data.filename] as Id, {
-          ...TOAST_STYLE,
-          progress: data.progress.percent,
-        });
+        return;
       }
     }
-  );
 
-  window.electron.ipcRenderer.madaraApp.onAppDownloadComplete(
-    (event: any, data: { appId: string }) => {
-      dispatch(setAppAsInstalled(data.appId));
-    }
-  );
-
-  const handleAppStart = (appId: string) => {
     window.electron.ipcRenderer.madaraApp.startApp(appId);
   };
 
@@ -163,7 +156,48 @@ export default function Apps() {
 
   useEffect(() => {
     dispatch(setupInstalledApps());
+
+    window.electron.ipcRenderer.madaraApp.onAppDownloadProgress(
+      (
+        event: any,
+        data: { appId: string; progress: Progress; filename: string }
+      ) => {
+        const TOAST_STYLE: ToastOptions = {
+          ...defaultToastStyleOptions,
+          hideProgressBar: false,
+          progressClassName: 'toast-progress-bar',
+          autoClose: false,
+        };
+        if (toastRefs[data.appId] === undefined) {
+          toastRefs[data.appId] = {};
+        }
+        if (toastRefs[data.appId][data.filename] === undefined) {
+          toastRefs[data.appId][data.filename] = toast(
+            `Downloading ${data.filename}`,
+            {
+              ...TOAST_STYLE,
+              progress: data.progress.percent,
+            }
+          );
+        } else {
+          toast.update(toastRefs[data.appId][data.filename] as Id, {
+            ...TOAST_STYLE,
+            progress: data.progress.percent,
+          });
+        }
+      }
+    );
+
+    window.electron.ipcRenderer.madaraApp.onAppDownloadComplete(
+      (event: any, data: { appId: string }) => {
+        dispatch(setAppAsInstalled(data.appId));
+      }
+    );
   }, []);
+
+  const closeDrawer = () => {
+    navigate('/navigation/apps');
+  };
 
   return (
     <AppsContainer>
@@ -173,11 +207,18 @@ export default function Apps() {
           let appRightJsx;
           if (runningApps[app.id]) {
             appRightJsx = (
-              <FontAwesomeIcon
-                onClick={() => handleAppStop(app.id)}
-                icon={faPause}
-                style={{ cursor: 'pointer' }}
-              />
+              <>
+                <FontAwesomeIcon
+                  onClick={() => handleAppStop(app.id)}
+                  icon={faPause}
+                  style={{ cursor: 'pointer' }}
+                />
+                <FontAwesomeIcon
+                  onClick={() => navigate(`./logs/${app.id}`)}
+                  icon={faTerminal}
+                  style={{ cursor: 'pointer', marginLeft: '15px' }}
+                />
+              </>
             );
           } else if (installedApps[app.id]) {
             appRightJsx = (
@@ -205,12 +246,57 @@ export default function Apps() {
                 <AppLogo src={app.logoUrl} />
                 <AppTitle>{app.appName}</AppTitle>
               </AppRowLeft>
-              <AppRowRight>{appRightJsx}</AppRowRight>
+              <AppRowRight>
+                {appRightJsx}
+                {app.settings && app.settings.length > 0 && (
+                  <FontAwesomeIcon
+                    onClick={() => navigate(`./settings/${app.id}`)}
+                    icon={faCog}
+                    style={{ cursor: 'pointer', marginLeft: '15px' }}
+                  />
+                )}
+                {app.markdownDocsUrl && (
+                  <FontAwesomeIcon
+                    icon={faInfo}
+                    style={{ cursor: 'pointer', marginLeft: '15px' }}
+                    onClick={() => navigate(`./docs/${app.id}`)}
+                  />
+                )}
+              </AppRowRight>
             </AppRow>
           );
         })}
       </AppRows>
       <ToastContainer />
+
+      <AnimatePresence>
+        <Routes key={location.pathname} location={location}>
+          <Route
+            path="/logs/:appId"
+            element={
+              <AppSideDrawer>
+                <AppLogs close={closeDrawer} />
+              </AppSideDrawer>
+            }
+          />
+          <Route
+            path="/docs/:appId"
+            element={
+              <AppSideDrawer>
+                <AppDocs close={closeDrawer} />
+              </AppSideDrawer>
+            }
+          />
+          <Route
+            path="/settings/:appId"
+            element={
+              <AppSideDrawer>
+                <AppSettings close={closeDrawer} />
+              </AppSideDrawer>
+            }
+          />
+        </Routes>
+      </AnimatePresence>
     </AppsContainer>
   );
 }
