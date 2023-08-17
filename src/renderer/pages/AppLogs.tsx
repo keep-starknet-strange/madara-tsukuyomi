@@ -5,7 +5,7 @@ import {
   selectAppLogs,
 } from 'renderer/features/appsSlice';
 import { styled } from 'styled-components';
-import { AnsiUp } from 'ansi_up';
+import AnsiUp from 'ansi_up';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClose } from '@fortawesome/free-solid-svg-icons';
 import { useParams } from 'react-router-dom';
