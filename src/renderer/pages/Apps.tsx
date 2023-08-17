@@ -21,13 +21,13 @@ import {
 import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
+import { showSnackbar } from 'renderer/store/snackbar';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import APPS_CONFIG from '../../../config/apps';
 import AppLogs from './AppLogs';
 import AppSideDrawer from './AppSideDrawer';
 import AppDocs from './AppDocs';
 import AppSettings from './AppSettings';
-import { showSnackbar } from 'renderer/store/snackbar';
 
 const AppsContainer = styled.div`
   height: 100%;

@@ -25,7 +25,7 @@ export default function Input({
   style?: CSSProperties;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string | undefined;
-  type: string;
+  type?: string;
 }) {
   return (
     <InputContainer
