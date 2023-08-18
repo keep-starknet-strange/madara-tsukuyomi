@@ -39,6 +39,12 @@ npm run start
 
 You can watch a demo of what we built till the Starknet Hacker House in Paris over [here](https://www.youtube.com/live/skyYpU0xjdc?feature=share&t=19640). However, keep in mind that this video will get outdated with time as we keep adding new features.
 
+## Contribution Guide
+
+If you wish to contribute to Tsukuyomi, feel free to comment on any unassigned issues. We will assign them to you ASAP. Please do not start any work until the issue is assigned. We will try to release a more detailed doc about the structure of the project for all new comers. However, till then, feel free to reach out to us on Telegram for any doubts and discussion.
+
+Telegram - https://t.me/+y1tlUAphfbVjOTFk
+
 ## Sign & Notarize Setup
 
 ***generate keys***
