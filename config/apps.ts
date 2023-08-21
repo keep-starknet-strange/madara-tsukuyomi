@@ -5,6 +5,7 @@ export type AppSettings = {
   type: 'plaintext' | 'secret';
   environmentName: string;
   required: boolean;
+  containerName: string;
 };
 
 export type CommonAppProperties = {
@@ -114,7 +115,7 @@ const APPS_CONFIG: { apps: (BinaryAppProperties | DockerAppProperties)[] } = {
       configParams: {},
       containers: [
         {
-          Image: 'quay.io/apibara/starknet:1.1.0',
+          Image: 'quay.io/apibara/starknet:1.0',
           Cmd: [
             'start',
             '--data=/data',
@@ -135,7 +136,7 @@ const APPS_CONFIG: { apps: (BinaryAppProperties | DockerAppProperties)[] } = {
       showFrontend: false,
       frontendUrl: 'http://localhost:80',
       logoUrl:
-        'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
+        'https://pbs.twimg.com/profile_images/1551145433547825159/on1AZ7qW_400x400.jpg',
       postInstallationCommands: [],
       markdownDocsUrl:
         'https://raw.githubusercontent.com/keep-starknet-strange/madara/main/README.md',
@@ -162,29 +163,53 @@ const APPS_CONFIG: { apps: (BinaryAppProperties | DockerAppProperties)[] } = {
             ],
           },
         },
+        {
+          Image: 'apoorvsadana/pragma_publish',
+          Cmd: [],
+          name: 'pragma-publish',
+        },
+        {
+          Image: 'apoorvsadana/pragma_explorer',
+          Cmd: [],
+          name: 'pragma-explorer',
+          HostConfig: {
+            PortBindings: {
+              '3000/tcp': [
+                {
+                  HostPort: '3131',
+                },
+              ],
+            },
+          },
+        },
       ],
-      showFrontend: false,
-      frontendUrl: 'http://localhost:80',
+      showFrontend: true,
+      frontendUrl: 'http://localhost:3131',
       logoUrl:
-        'https://pbs.twimg.com/profile_images/1632841549225635841/pRDUFNkT_400x400.png',
-      postInstallationCommands: [],
+        'https://pbs.twimg.com/profile_images/1660624429632585728/XHGqaFAP_400x400.jpg',
+      postInstallationCommands: [
+        'curl -O https://raw.githubusercontent.com/apoorvsadana/storage/main/pragma_price_dump.js',
+      ],
       settings: [
         {
           name: 'Supabase Url',
           type: 'plaintext',
-          environmentName: 'SUPABASE_URL',
+          environmentName: 'NEXT_PUBLIC_SUPABASE_URL',
+          containerName: 'pragma-explorer',
           required: true,
         },
         {
           name: 'Supabase Anon Key',
           type: 'secret',
-          environmentName: 'SUPABASE_ANON_KEY',
+          environmentName: 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+          containerName: 'pragma-explorer',
           required: true,
         },
         {
           name: 'Postgres Connection String',
           type: 'plaintext',
           environmentName: 'POSTGRES_CONNECTION_STRING',
+          containerName: 'apibara-sink-postgres',
           required: true,
         },
       ],

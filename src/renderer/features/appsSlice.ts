@@ -36,10 +36,13 @@ export const appsSlice = createSlice({
       state.appLogs[data.payload.appId][data.payload.containerName] +=
         data.payload.logs;
     },
+    clearAppLogs: (state, data) => {
+      state.appLogs[data.payload.appId] = {};
+    },
   },
 });
 
-export const { setInstalledApps, setRunningApps, appendAppLogs } =
+export const { setInstalledApps, setRunningApps, appendAppLogs, clearAppLogs } =
   appsSlice.actions;
 
 export const selectInstalledApps = (state: any): InstalledApps =>
@@ -86,9 +89,12 @@ window.electron.ipcRenderer.madaraApp.onAppStart(
 );
 
 window.electron.ipcRenderer.madaraApp.onAppStop(
-  (event: any, data: { appId: string }) =>
+  (event: any, data: { appId: string }) => {
     // @ts-ignore
-    getStore().dispatch(updateAppRunningStatus(data.appId, false))
+    getStore().dispatch(updateAppRunningStatus(data.appId, false));
+    // @ts-ignore
+    getStore().dispatch(clearAppLogs({ appId: data.appId }));
+  }
 );
 
 // listener to add logs for apps
