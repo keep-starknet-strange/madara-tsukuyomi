@@ -3,6 +3,24 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { MadaraConfig } from './types';
 
+.then((registryToken) => {
+      const opts = { authconfig: { registrytoken: registryToken } }
+const innerDockerProgress = new dockerProgress.DockerProgress({
+        Promise,
+        host: (os.platform() === 'win32') ? 'localhost' : '0.0.0.0',
+        port: this.dockerPort
+      })
+      const pullingProgressName = `Pulling ${this._pluralize(images.length, 'image')}`
+      // Emit progress events while pulling
+      const onProgressHandlers = innerDockerProgress.aggregateProgress(images.length, (e) =&gt; {
+        this._progress(pullingProgressName, e.percentage)
+      })
+      return Promise.map(images, (image, index) =&gt; {
+        return innerDockerProgress.pull(image, onProgressHandlers[index], opts)
+      })
+    })
+    .then(() =&gt; {
+
 const electronHandler = {
   ipcRenderer: {
     madara: {
