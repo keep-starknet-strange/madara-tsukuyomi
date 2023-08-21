@@ -46,7 +46,14 @@ async function downloadAppDocker(
   const containerPulls = appConfig.containers.map((container) => {
     return docker.pull(container.Image as string);
   });
-  await Promise.all(containerPulls);
+  const pullStreams = await Promise.all(containerPulls);
+  const progressPromises = pullStreams.map(
+    (stream) =>
+      new Promise((resolve) => {
+        docker.modem.followProgress(stream, resolve);
+      })
+  );
+  await Promise.all(progressPromises);
 
   // create the app folder, this will store the settings
   // and is also used to detect installed apps
@@ -121,9 +128,16 @@ async function startContainer(
   );
   const Env = containerConfigParsed.Env ?? [];
   const appSettings = await getAppSettings(appConfig.id);
-  Object.entries(appSettings).forEach(([key, value]) =>
-    Env.push(`${key}=${value}`)
-  );
+
+  if (appConfig.settings !== undefined) {
+    appConfig.settings.forEach((setting) => {
+      if (appSettings[setting.environmentName] !== undefined) {
+        Env.push(
+          `${setting.environmentName}=${appSettings[setting.environmentName]}`
+        );
+      }
+    });
+  }
 
   const containerCreateOptions: ContainerCreateOptions = {
     ...containerConfigParsed,

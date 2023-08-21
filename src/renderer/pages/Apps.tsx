@@ -126,9 +126,10 @@ export default function Apps() {
 
   const dispatch = useAppDispatch();
 
-  const handleAppDownload = (appId: string) => {
+  const handleAppDownload = async (appId: string) => {
     setLoading({ ...loading, [appId]: true });
-    window.electron.ipcRenderer.madaraApp.download(appId);
+    await window.electron.ipcRenderer.madaraApp.download(appId);
+    setLoading({ ...loading, [appId]: false });
   };
 
   const handleAppStart = async (appId: string) => {
@@ -147,7 +148,9 @@ export default function Apps() {
       }
     }
 
-    window.electron.ipcRenderer.madaraApp.startApp(appId);
+    setLoading({ ...loading, [appId]: true });
+    await window.electron.ipcRenderer.madaraApp.startApp(appId);
+    setLoading({ ...loading, [appId]: false });
   };
 
   const handleAppStop = (appId: string) => {
@@ -221,13 +224,17 @@ export default function Apps() {
               </>
             );
           } else if (installedApps[app.id]) {
-            appRightJsx = (
-              <FontAwesomeIcon
-                onClick={() => handleAppStart(app.id)}
-                icon={faPlay}
-                style={{ cursor: 'pointer' }}
-              />
-            );
+            if (loading[app.id]) {
+              appRightJsx = <Loader />;
+            } else {
+              appRightJsx = (
+                <FontAwesomeIcon
+                  onClick={() => handleAppStart(app.id)}
+                  icon={faPlay}
+                  style={{ cursor: 'pointer' }}
+                />
+              );
+            }
           } else if (loading[app.id]) {
             appRightJsx = <Loader />;
           } else {

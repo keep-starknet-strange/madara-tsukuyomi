@@ -27,7 +27,7 @@ const initialState = {
     RPCPort: '9944',
     telemetryURL: 'wss://telemetry.madara.zone/submit 0',
     bootnodes: '',
-    testnet: 'sharingan',
+    testnet: '',
     name: '',
     release: 'v0.1.0.experimental.3',
     developmentMode: 'false',
