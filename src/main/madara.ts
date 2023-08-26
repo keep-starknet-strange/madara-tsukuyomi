@@ -11,28 +11,12 @@ import { MadaraConfig } from './types';
 import { MADARA_RELEASES_URL } from '../../config/constants';
 
 const RELEASES_FOLDER = `${MADARA_APP_PATH}/releases`;
-
-// we download the chain specs for now because of an issue in the binaries
-// we can skip this step once this is fixed -  https://github.com/keep-starknet-strange/madara/issues/728
-const CHAIN_SPECS_FOLDER = `${app.getPath('home')}/.madara/chain-specs`;
 const CHAIN_DB_FOLDER = `${MADARA_APP_PATH}/data`;
 
 const EQUALITY_FLAGS = ['RPCMethods', 'RPCCors'];
 const BOOLEAN_FLAGS = ['RPCExternal', 'developmentMode'];
 
 const SETUP_FILES = [
-  {
-    url: `https://raw.githubusercontent.com/keep-starknet-strange/madara/main/crates/node/chain-specs/testnet-sharingan.json`,
-    directory: CHAIN_SPECS_FOLDER,
-    showProgress: false,
-    saveFilename: 'testnet-sharingan.json',
-  },
-  {
-    url: `https://raw.githubusercontent.com/keep-starknet-strange/madara/main/crates/node/chain-specs/testnet-sharingan-raw.json`,
-    directory: CHAIN_SPECS_FOLDER,
-    showProgress: false,
-    saveFilename: 'testnet-sharingan-raw.json',
-  },
   {
     url: getReleaseUrl,
     directory: RELEASES_FOLDER,

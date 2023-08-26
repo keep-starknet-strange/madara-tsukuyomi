@@ -16,8 +16,10 @@ export type configTypes =
   | 'release'
   | 'developmentMode';
 
+const STARTING_LOGS = 'Starting...';
+
 const initialState = {
-  logs: '',
+  logs: STARTING_LOGS,
   isRunning: false,
   config: {
     RPCCors: '',
@@ -106,7 +108,7 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
 
 export const deleteNode = () => async (dispatch: any) => {
   dispatch(setIsRunning(false));
-  dispatch(setLogs(''));
+  dispatch(setLogs(STARTING_LOGS));
   dispatch(closeAllApps());
   await window.electron.ipcRenderer.madara.delete();
 };
