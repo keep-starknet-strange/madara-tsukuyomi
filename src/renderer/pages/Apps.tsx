@@ -18,6 +18,7 @@ import {
   setAppAsInstalled,
   setupInstalledApps,
 } from 'renderer/features/appsSlice';
+import { selectIsRunning } from 'renderer/features/nodeSlice';
 import { useAppDispatch, useAppSelector } from 'renderer/utils/hooks';
 import { styled } from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
@@ -123,6 +124,7 @@ export default function Apps() {
   const runningApps = useAppSelector(selectRunningApps);
   const navigate = useNavigate();
   const location = useLocation();
+  const isNodeRunning = useAppSelector(selectIsRunning);
 
   const dispatch = useAppDispatch();
 
@@ -136,6 +138,17 @@ export default function Apps() {
     const appSettings =
       await window.electron.ipcRenderer.madaraApp.getAppSettings(appId);
     const appConfig = APPS_CONFIG.apps.find((app) => app.id === appId);
+    const requiresRunningNode = true;
+
+    if (requiresRunningNode) {
+      if (!isNodeRunning) {
+        dispatch(
+          showSnackbar('Node must be running in order to start the app')
+        );
+        return;
+      }
+    }
+
     if (appConfig?.settings && appConfig.settings.length > 0) {
       const missingSettings = appConfig.settings.filter(
         (setting) => !appSettings[setting.environmentName]
