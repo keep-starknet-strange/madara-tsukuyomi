@@ -123,7 +123,6 @@ window.electron.ipcRenderer.madara.onNodeLogs((event: any, data: string) => {
 // and terminate all running apps
 window.electron.ipcRenderer.madara.onNodeStop(() => {
   const runningApps = useAppSelector(selectRunningApps);
-  getStore().dispatch(appendLogs(runningApps));
 
   // Terminate all currently running apps
   Object.keys(runningApps).forEach((appId) => {

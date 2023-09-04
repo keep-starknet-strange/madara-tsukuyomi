@@ -138,9 +138,8 @@ export default function Apps() {
     const appSettings =
       await window.electron.ipcRenderer.madaraApp.getAppSettings(appId);
     const appConfig = APPS_CONFIG.apps.find((app) => app.id === appId);
-    const requiresRunningNode = true;
 
-    if (requiresRunningNode) {
+    if (appConfig?.requiresRunningNode) {
       if (!isNodeRunning) {
         dispatch(
           showSnackbar('Node must be running in order to start the app')
