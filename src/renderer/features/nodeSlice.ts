@@ -22,7 +22,7 @@ const initialState = {
   logs: STARTING_LOGS,
   isRunning: false,
   config: {
-    RPCCors: '',
+    RPCCors: 'all',
     RPCExternal: 'false',
     RPCMethods: 'Auto',
     port: '10333',
@@ -31,8 +31,8 @@ const initialState = {
     bootnodes: '',
     testnet: '',
     name: '',
-    release: 'v0.1.0.experimental.3',
-    developmentMode: 'false',
+    release: 'v0.1.0.experimental.6',
+    developmentMode: 'true',
   },
   setupComplete: false,
 };
