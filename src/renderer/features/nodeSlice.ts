@@ -1,8 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { MadaraConfig } from 'main/types';
 import { getStore } from 'renderer/store/storeRegistry';
-import { useAppSelector } from 'renderer/utils/hooks';
-import { closeAllApps, selectRunningApps } from './appsSlice';
+import { closeAllApps } from './appsSlice';
 
 export type configTypes =
   | 'RPCCors'
@@ -103,6 +102,7 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
   if (!isRunning) {
     return;
   }
+  dispatch(closeAllApps());
   await window.electron.ipcRenderer.madara.stop();
   dispatch(setIsRunning(false));
 };
@@ -122,13 +122,6 @@ window.electron.ipcRenderer.madara.onNodeLogs((event: any, data: string) => {
 // set up listener to set isRunning to false when node stops
 // and terminate all running apps
 window.electron.ipcRenderer.madara.onNodeStop(() => {
-  const runningApps = useAppSelector(selectRunningApps);
-
-  // Terminate all currently running apps
-  Object.keys(runningApps).forEach((appId) => {
-    window.electron.ipcRenderer.madaraApp.stopApp(appId);
-  });
-
   getStore().dispatch(setIsRunning(false));
   // get local data time in format YYYY-MM-DD HH:MM:SS
   const date = new Date()
