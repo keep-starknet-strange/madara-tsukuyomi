@@ -102,6 +102,7 @@ export const stopNode = () => async (dispatch: any, getState: any) => {
   if (!isRunning) {
     return;
   }
+  dispatch(closeAllApps());
   await window.electron.ipcRenderer.madara.stop();
   dispatch(setIsRunning(false));
 };
@@ -119,6 +120,7 @@ window.electron.ipcRenderer.madara.onNodeLogs((event: any, data: string) => {
 });
 
 // set up listener to set isRunning to false when node stops
+// and terminate all running apps
 window.electron.ipcRenderer.madara.onNodeStop(() => {
   getStore().dispatch(setIsRunning(false));
   // get local data time in format YYYY-MM-DD HH:MM:SS
