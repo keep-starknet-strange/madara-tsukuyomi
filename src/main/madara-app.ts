@@ -190,7 +190,93 @@ export async function startApp(window: BrowserWindow, appId: string) {
   if (appConfig.appType === 'binary') {
     await startAppBinary(window, appConfig);
   } else if (appConfig.appType === 'docker') {
-    await startAppDocker(window, appConfig);
+    // const containerNames = appConfig.containers.map((container) =>
+    //   getContainerName(container, appConfig)
+    // );
+
+    const containerName = getContainerName(appConfig.containers[0], appConfig);
+
+    const runningContainers = await docker.listContainers();
+    // const isAppRunning = runningContainers.some((container) =>
+    //   containerNames.includes(container.Names[0].replace(/^\//, ''))
+    // );
+    const isAppRunning = runningContainers.some(
+      (container) => container.Names[0].replace(/^\//, '') === containerName
+    );
+    console.log(isAppRunning);
+    if (isAppRunning) {
+      // Fetch and send the current logs of the Docker container to the window.
+      // const containerLogPromises = containerNames.map(async (containerName) => {
+      //   const container = docker.getContainer(containerName);
+      //   const logStream = await container.logs({
+      //     follow: true,
+      //     stdout: true,
+      //     stderr: true,
+      //   });
+      //   logStream.on('data', (data) => {
+      //     console.log(data.toString());
+      //     window.webContents.send('app-logs', {
+      //       appId,
+      //       logs: data.toString(),
+      //     });
+      //   });
+      // });
+      // await Promise.all(containerLogPromises);
+      //   container.attach(
+      //     { stream: true, stdout: true, stderr: true },
+      //     (err, stream) => {
+      //       if (err) {
+      //         console.error('Error attaching to container:', err);
+      //         return;
+      //       }
+      //       if (!stream) {
+      //         console.error('No stream returned from container attach');
+      //         return;
+      //       }
+      //       stream.on('data', (data) => {
+      //         // Removing the first 8 bytes as they have information about the stream
+      //         const buffer = Buffer.from(data).subarray(8, data.length);
+      //         const event: AppAppendLogs = {
+      //           appId,
+      //           containerName: containerName.replace(`${appId}-`, ``),
+      //           logs: buffer.toString(),
+      //         };
+      //         window.webContents.send('app-logs', event);
+      //       });
+      //     }
+      //   );
+      // });
+      // await Promise.all(containerLogPromises);
+      const container = docker.getContainer(containerName);
+      container.attach(
+        { stream: true, stdout: true, stderr: true },
+        (err, stream) => {
+          if (err) {
+            console.error('Error attaching to container:', err);
+            return;
+          }
+          if (!stream) {
+            console.error('No stream returned from container attach');
+            return;
+          }
+          stream.on('data', (data) => {
+            const buffer = Buffer.from(data).subarray(8, data.length);
+            const event: AppAppendLogs = {
+              appId,
+              containerName: containerName.replace(`${appId}-`, ``),
+              logs: buffer.toString(),
+            };
+            window.webContents.send('app-logs', event);
+          });
+        }
+      );
+    } else {
+      try {
+        await startAppDocker(window, appConfig);
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
   window.webContents.send('app-start', {
     appId,
