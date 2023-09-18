@@ -255,55 +255,54 @@ export async function getAppSettings(appId: string) {
 
 export async function fetchAllRunningApps(window: BrowserWindow) {
   const containers = await docker.listContainers();
-  const runningApps: { [appId: string]: boolean } = {};
+  const runningApps: string[] = []; // Use array instead of an object.
 
   containers.forEach((container) => {
     const containerName = container.Names[0].substring(1); // remove the leading "/"
     const parts = containerName.split('-');
     const partialAppId = parts.slice(1, 5).join('-');
-    runningApps[partialAppId] = true;
+
+    if (!runningApps.includes(partialAppId)) {
+      runningApps.push(partialAppId);
+    }
   });
 
-  const partialAppIds = Object.keys(runningApps);
-
-  const appsFromConfigRunning = APPS_CONFIG.apps.filter((app) =>
-    partialAppIds.some((partialAppId) => app.id.startsWith(partialAppId))
+  const appsFromConfigRunning = APPS_CONFIG.apps.filter(
+    (app) =>
+      app.appType === 'docker' &&
+      runningApps.some((partialAppId) => app.id.startsWith(partialAppId))
   );
 
-  appendLogs(appsFromConfigRunning as DockerAppProperties[], window);
-  return appsFromConfigRunning;
-}
+  const appNamesFromConfigRunning = appsFromConfigRunning
+    .map((app) => {
+      if ('containers' in app) {
+        // This checks if the app has a containers property
+        return app.containers[0].name;
+      }
+      return null;
+    })
+    .filter((name) => name !== null);
 
-export async function appendLogs(
-  apps: DockerAppProperties[],
-  window: BrowserWindow
-) {
-  apps.map(async (app) => {
-    const containers = await docker.listContainers({
-      filters: {
-        name: [`${app.id}-*`],
-      },
-    });
-    await Promise.all(
-      containers.map(async (container) => {
-        const containerApp = await docker.getContainer(container.Id);
-        containerApp.attach(
-          { stream: true, stdout: true, stderr: true },
-          (err, stream) => {
-            if (!stream) return;
-            stream.on('data', (data) => {
-              // removing the first 8 bytes as they have information about the stream
-              const buffer = Buffer.from(data).subarray(8, data.length);
-              const event: AppAppendLogs = {
-                appId: app.id,
-                containerName: container.Names[0].substring(1),
-                logs: buffer.toString(),
-              };
-              window.webContents.send('app-logs', event);
-            });
-          }
-        );
-      })
-    );
-  });
+  await Promise.all(
+    containers.map(async (container) => {
+      const containerApp = await docker.getContainer(container.Id);
+      containerApp.attach(
+        { stream: true, stdout: true, stderr: true },
+        (err, stream) => {
+          if (!stream) return;
+          stream.on('data', (data) => {
+            // removing the first 8 bytes as they have information about the stream
+            const buffer = Buffer.from(data).subarray(8, data.length);
+            const event: AppAppendLogs = {
+              appId: appsFromConfigRunning[0].id,
+              containerName: appNamesFromConfigRunning[0] as string,
+              logs: buffer.toString(),
+            };
+            window.webContents.send('app-logs', event);
+          });
+        }
+      );
+    })
+  );
+  return appsFromConfigRunning;
 }
