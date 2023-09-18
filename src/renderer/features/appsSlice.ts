@@ -50,6 +50,9 @@ export const selectInstalledApps = (state: any): InstalledApps =>
 export const selectRunningApps = (state: any): RunningApps => {
   return state.apps.runningApps;
 };
+export const selectAppsFetched = (state: any): boolean => {
+  return state.apps.appsFetched;
+};
 export const selectAppLogs = (state: any): AppLogs => {
   return state.apps.appLogs;
 };
@@ -65,6 +68,16 @@ export const updateAppRunningStatus =
     const runningApps = selectRunningApps(getState());
     dispatch(setRunningApps({ ...runningApps, [appId]: status }));
   };
+
+export const fetchAndSetRunningApps = () => async (dispatch: any) => {
+  const fetchedApps =
+    await window.electron.ipcRenderer.madaraApp.fetchAllRunningApps();
+  const appsObject = fetchedApps.reduce((acc: any, app: any) => {
+    acc[app.id] = true;
+    return acc;
+  }, {});
+  dispatch(setRunningApps(appsObject));
+};
 
 export const setupInstalledApps = () => async (dispatch: any) => {
   const installedApps =

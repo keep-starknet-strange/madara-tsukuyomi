@@ -13,6 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Button from 'renderer/components/Button';
 import defaultToastStyleOptions from 'shared/constants';
 import {
+  fetchAndSetRunningApps,
   selectInstalledApps,
   selectRunningApps,
   setAppAsInstalled,
@@ -168,6 +169,10 @@ export default function Apps() {
   const handleAppStop = (appId: string) => {
     window.electron.ipcRenderer.madaraApp.stopApp(appId);
   };
+
+  useEffect(() => {
+    dispatch(fetchAndSetRunningApps());
+  }, []);
 
   useEffect(() => {
     dispatch(setupInstalledApps());
