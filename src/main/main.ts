@@ -99,6 +99,10 @@ ipcMain.handle('madara-app-get-settings', (event, appId: string) => {
   return MadaraApp.getAppSettings(appId);
 });
 
+ipcMain.handle('madara-fetch-all-running-apps', () => {
+  return MadaraApp.fetchAllRunningApps(mainWindow as BrowserWindow);
+});
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();

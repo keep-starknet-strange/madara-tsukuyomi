@@ -338,3 +338,58 @@ export async function getAppSettings(appId: string) {
   }
   return {};
 }
+
+export async function fetchAllRunningApps(window: BrowserWindow) {
+  const containers = await docker.listContainers();
+  const runningApps: { [appId: string]: boolean } = {};
+
+  containers.forEach((container) => {
+    const containerName = container.Names[0].substring(1); // remove the leading "/"
+    const parts = containerName.split('-');
+    const partialAppId = parts.slice(1, 5).join('-');
+    runningApps[partialAppId] = true;
+  });
+
+  const partialAppIds = Object.keys(runningApps);
+
+  const appsFromConfigRunning = APPS_CONFIG.apps.filter((app) =>
+    partialAppIds.some((partialAppId) => app.id.startsWith(partialAppId))
+  );
+
+  appendLogs(appsFromConfigRunning as DockerAppProperties[], window);
+  return appsFromConfigRunning;
+}
+
+export async function appendLogs(
+  apps: DockerAppProperties[],
+  window: BrowserWindow
+) {
+  apps.map(async (app) => {
+    const containers = await docker.listContainers({
+      filters: {
+        name: [`${app.id}-*`],
+      },
+    });
+    await Promise.all(
+      containers.map(async (container) => {
+        const containerApp = await docker.getContainer(container.Id);
+        containerApp.attach(
+          { stream: true, stdout: true, stderr: true },
+          (err, stream) => {
+            if (!stream) return;
+            stream.on('data', (data) => {
+              // removing the first 8 bytes as they have information about the stream
+              const buffer = Buffer.from(data).subarray(8, data.length);
+              const event: AppAppendLogs = {
+                appId: app.id,
+                containerName: container.Names[0].substring(1),
+                logs: buffer.toString(),
+              };
+              window.webContents.send('app-logs', event);
+            });
+          }
+        );
+      })
+    );
+  });
+}
