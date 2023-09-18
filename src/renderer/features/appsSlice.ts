@@ -50,9 +50,7 @@ export const selectInstalledApps = (state: any): InstalledApps =>
 export const selectRunningApps = (state: any): RunningApps => {
   return state.apps.runningApps;
 };
-export const selectAppsFetched = (state: any): boolean => {
-  return state.apps.appsFetched;
-};
+
 export const selectAppLogs = (state: any): AppLogs => {
   return state.apps.appLogs;
 };
