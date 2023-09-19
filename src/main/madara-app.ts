@@ -154,24 +154,15 @@ async function startContainer(
     ];
   }
   const container = await docker.createContainer(containerCreateOptions);
-  // create a write stream
 
-  container.attach(
-    { stream: true, stdout: true, stderr: true },
-    (err, stream) => {
-      if (!stream) return;
-      stream.on('data', (data) => {
-        // removing the first 8 bytes as they have information about the stream
-        const buffer = Buffer.from(data).subarray(8, data.length);
-        const event: AppAppendLogs = {
-          appId: appConfig.id,
-          containerName: containerConfig.name as string,
-          logs: buffer.toString(),
-        };
-        window.webContents.send('app-logs', event);
-      });
-    }
+  // create a write stream
+  await attachAndSendLogs(
+    window,
+    container.id,
+    appConfig.id,
+    containerConfig.name as string
   );
+
   await container.start();
 }
 
@@ -285,24 +276,38 @@ export async function fetchAllRunningApps(window: BrowserWindow) {
 
   await Promise.all(
     containers.map(async (container) => {
-      const containerApp = await docker.getContainer(container.Id);
-      containerApp.attach(
-        { stream: true, stdout: true, stderr: true },
-        (err, stream) => {
-          if (!stream) return;
-          stream.on('data', (data) => {
-            // removing the first 8 bytes as they have information about the stream
-            const buffer = Buffer.from(data).subarray(8, data.length);
-            const event: AppAppendLogs = {
-              appId: appsFromConfigRunning[0].id,
-              containerName: appNamesFromConfigRunning[0] as string,
-              logs: buffer.toString(),
-            };
-            window.webContents.send('app-logs', event);
-          });
-        }
+      await attachAndSendLogs(
+        window,
+        container.Id,
+        appsFromConfigRunning[0].id,
+        appNamesFromConfigRunning[0] as string
       );
     })
   );
   return appsFromConfigRunning;
+}
+
+async function attachAndSendLogs(
+  window: BrowserWindow,
+  containerId: string,
+  appId: string,
+  containerName: string
+) {
+  const containerApp = await docker.getContainer(containerId);
+  containerApp.attach(
+    { stream: true, stdout: true, stderr: true },
+    (err, stream) => {
+      if (!stream) return;
+      stream.on('data', (data) => {
+        // removing the first 8 bytes as they have information about the stream
+        const buffer = Buffer.from(data).subarray(8, data.length);
+        const event: AppAppendLogs = {
+          appId,
+          containerName,
+          logs: buffer.toString(),
+        };
+        window.webContents.send('app-logs', event);
+      });
+    }
+  );
 }
