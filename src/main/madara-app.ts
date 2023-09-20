@@ -246,23 +246,20 @@ export async function getAppSettings(appId: string) {
 
 export async function fetchAllRunningApps(window: BrowserWindow) {
   const containers = await docker.listContainers();
-  const runningApps: string[] = []; // Use array instead of an object.
-
-  containers.forEach((container) => {
-    const containerName = container.Names[0].substring(1); // remove the leading "/"
-    const parts = containerName.split('-');
-    const partialAppId = parts.slice(1, 5).join('-');
-
-    if (!runningApps.includes(partialAppId)) {
-      runningApps.push(partialAppId);
-    }
-  });
-
-  const appsFromConfigRunning = APPS_CONFIG.apps.filter(
-    (app) =>
-      app.appType === 'docker' &&
-      runningApps.some((partialAppId) => app.id.startsWith(partialAppId))
+  // Extract names of all running containers
+  const runningContainerNames = containers.map(
+    (container) => container.Names[0].substring(1) // removing the first / from the name
   );
+
+  // Filter apps based on running containers
+  const appsFromConfigRunning = APPS_CONFIG.apps.filter((app) => {
+    return (
+      app.appType === 'docker' &&
+      runningContainerNames.some((containerName) =>
+        containerName.includes(app.id)
+      )
+    );
+  });
 
   const appNamesFromConfigRunning = appsFromConfigRunning
     .map((app) => {
