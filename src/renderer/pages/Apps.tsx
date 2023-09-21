@@ -149,6 +149,15 @@ export default function Apps() {
       }
     }
 
+    const requiresRunningNode = true;
+    if (requiresRunningNode) {
+      if (!isNodeRunning) {
+        dispatch(
+          showSnackbar('Node must be running in order to start the app')
+        );
+        return;
+      }
+    }
     if (appConfig?.settings && appConfig.settings.length > 0) {
       const missingSettings = appConfig.settings.filter(
         (setting) => !appSettings[setting.environmentName]
