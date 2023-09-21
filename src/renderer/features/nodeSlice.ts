@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { MadaraConfig } from 'main/types';
 import { getStore } from 'renderer/store/storeRegistry';
-import { closeAllApps } from './appsSlice';
+import { useAppSelector } from 'renderer/utils/hooks';
+import { closeAllApps, selectRunningApps } from './appsSlice';
 
 export type configTypes =
   | 'RPCCors'
