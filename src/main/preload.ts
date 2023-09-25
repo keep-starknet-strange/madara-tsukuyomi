@@ -40,6 +40,8 @@ const electronHandler = {
       getAppSettings: (appId: string) =>
         ipcRenderer.invoke('madara-app-get-settings', appId),
     },
+    onUnhandledError: (callback: (message: string) => void) =>
+      ipcRenderer.on('unhandled-error', (event, message) => callback(message))
   },
 };
 

@@ -20,6 +20,15 @@ import { TWEET_INTENT } from './constants';
 import { MadaraConfig } from './types';
 import FireBaseService from './firebase';
 
+let mainWindow: BrowserWindow | null = null;
+
+process.on('uncaughtException', (error) => {
+  log.error('UNHANDLED EXCEPTION:', error);
+  if (mainWindow) {
+    mainWindow.webContents.send('unhandled-error', 'Something went wrong in the serverside');
+  }
+});
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -27,8 +36,6 @@ class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-
-let mainWindow: BrowserWindow | null = null;
 
 ipcMain.handle('madara-start', async (event, config: MadaraConfig) => {
   await Madara.start(mainWindow as BrowserWindow, config);
@@ -110,6 +117,7 @@ const isDebug =
 if (isDebug) {
   require('electron-debug')();
 }
+
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
