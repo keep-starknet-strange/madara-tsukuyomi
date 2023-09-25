@@ -189,14 +189,6 @@ const createWindow = async () => {
         callback({ cancel: false, responseHeaders: details.responseHeaders });
       }
     );
-
-    setTimeout(() => {
-      throw new Error('test error in the main process');
-    }, 10000);
-
-    setTimeout(() => {
-      throw new Error('test error in the main process');
-    }, 20000);
   });
 
   mainWindow.on('closed', async () => {
