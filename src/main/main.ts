@@ -19,6 +19,17 @@ import { resolveHtmlPath } from './util';
 import { TWEET_INTENT } from './constants';
 import { MadaraConfig } from './types';
 import FireBaseService from './firebase';
+import { set } from 'lodash';
+
+let mainWindow: BrowserWindow | null = null;
+
+process.on('uncaughtException', (error) => {
+  console.error('Unhandled error from main process:', error);
+
+  BrowserWindow.getAllWindows().forEach((win) => {
+    win.webContents.send('backend-error', error);
+  });
+});
 
 class AppUpdater {
   constructor() {
@@ -27,8 +38,6 @@ class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-
-let mainWindow: BrowserWindow | null = null;
 
 ipcMain.handle('madara-start', async (event, config: MadaraConfig) => {
   await Madara.start(mainWindow as BrowserWindow, config);
@@ -180,6 +189,14 @@ const createWindow = async () => {
         callback({ cancel: false, responseHeaders: details.responseHeaders });
       }
     );
+
+    setTimeout(() => {
+      throw new Error('test error in the main process');
+    }, 10000);
+
+    setTimeout(() => {
+      throw new Error('test error in the main process');
+    }, 20000);
   });
 
   mainWindow.on('closed', async () => {
