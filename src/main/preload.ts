@@ -42,6 +42,12 @@ const electronHandler = {
       fetchAllRunningApps: () =>
         ipcRenderer.invoke('madara-fetch-all-running-apps'),
     },
+    onUnhandledError: (callback: (message: string) => void) =>
+      ipcRenderer.on('backend-error', (event, message) => callback(message)),
+    offUnhandledError: (callback: (message: string) => void) =>
+      ipcRenderer.removeListener('backend-error', (event, message) =>
+        callback(message)
+      ),
   },
 };
 
