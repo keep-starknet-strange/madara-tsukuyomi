@@ -192,7 +192,9 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
 
   // BY DEFAULT SUBSTRATE LOGS TO STDERR SO WE USE THIS
   childProcess.stderr.on('data', (data) => {
-    window.webContents.send('node-logs', data.toString());
+    if (!window.isDestroyed()) {
+      window.webContents.send('node-logs', data.toString());
+    }
   });
 
   // Update the react state when the node is stopped

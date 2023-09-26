@@ -16,6 +16,7 @@ import Button from 'renderer/components/Button';
 import Tooltip from 'renderer/components/Tooltip';
 import defaultToastStyleOptions from 'shared/constants';
 import {
+  fetchAndSetRunningApps,
   selectInstalledApps,
   selectRunningApps,
   setAppAsInstalled,
@@ -174,6 +175,7 @@ export default function Apps() {
   };
 
   useEffect(() => {
+    dispatch(fetchAndSetRunningApps());
     dispatch(setupInstalledApps());
 
     window.electron.ipcRenderer.madaraApp.onAppDownloadProgress(
