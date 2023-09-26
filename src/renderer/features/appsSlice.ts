@@ -68,14 +68,20 @@ export const updateAppRunningStatus =
   };
 
 export const fetchAndSetRunningApps = () => async (dispatch: any) => {
-  const fetchedApps =
-    await window.electron.ipcRenderer.madaraApp.fetchAllRunningApps();
-  const appsObject = fetchedApps.reduce((acc: any, app: any) => {
-    acc[app.id] = true;
-    return acc;
-  }, {});
-  dispatch(setRunningApps(appsObject));
+  const fetchedApps = await window.electron.ipcRenderer.madaraApp.fetchAllRunningApps();
+
+  // Check if fetchedApps is defined and it's an array.
+  if (Array.isArray(fetchedApps)) {
+    const appsObject = fetchedApps.reduce((acc: any, app: any) => {
+      acc[app.id] = true;
+      return acc;
+    }, {});
+    dispatch(setRunningApps(appsObject));
+  } else {
+    console.error('Failed to fetch running apps:', fetchedApps);
+  }
 };
+
 
 export const setupInstalledApps = () => async (dispatch: any) => {
   const installedApps =
