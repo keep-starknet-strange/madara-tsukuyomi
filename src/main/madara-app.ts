@@ -303,7 +303,9 @@ async function attachAndSendLogs(
           containerName,
           logs: buffer.toString(),
         };
-        window.webContents.send('app-logs', event);
+        if (!window.isDestroyed()) {
+          window.webContents.send('app-logs', event);
+        }
       });
     }
   );
