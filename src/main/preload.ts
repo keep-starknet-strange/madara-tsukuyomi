@@ -44,6 +44,10 @@ const electronHandler = {
     },
     onUnhandledError: (callback: (message: string) => void) =>
       ipcRenderer.on('backend-error', (event, message) => callback(message)),
+    offUnhandledError: (callback: (message: string) => void) =>
+      ipcRenderer.removeListener('backend-error', (event, message) =>
+        callback(message)
+      ),
   },
 };
 

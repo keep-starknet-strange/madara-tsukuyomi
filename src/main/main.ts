@@ -19,21 +19,29 @@ import { resolveHtmlPath } from './util';
 import { TWEET_INTENT } from './constants';
 import { MadaraConfig } from './types';
 import FireBaseService from './firebase';
-
-setTimeout(()=> { //throw an error in the main process for demonstration purpose
-  throw new Error('error for demonstration purpose in the main process')
-},10000)
+import { IpcMainInvokeEvent } from 'electron';
 
 
 let mainWindow: BrowserWindow | null = null;
 
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error) => { //Global error handler, to catch error outside IPChandler. Works when electronmon is off
   console.error('Unhandled error from main process:', error);
 
   BrowserWindow.getAllWindows().forEach((win) => {
     win.webContents.send('backend-error', error);
   });
 });
+
+function withErrorHandler(handler: (event: IpcMainInvokeEvent, ...args: any[]) => Promise<any>) { //IPC error handler
+  return async function(event: IpcMainInvokeEvent, ...args: any[]) {
+    try {
+      return await handler(event, ...args);
+    } catch (error) {
+      console.error("Error in IPC handler:", error);
+      event.sender.send('backend-error', error);
+    }
+  };
+}
 
 class AppUpdater {
   constructor() {
@@ -43,27 +51,28 @@ class AppUpdater {
   }
 }
 
-ipcMain.handle('madara-start', async (event, config: MadaraConfig) => {
+
+ipcMain.handle('madara-start', withErrorHandler(async (event, config: MadaraConfig) => {
   await Madara.start(mainWindow as BrowserWindow, config);
-});
+}));
 
-ipcMain.handle('madara-stop', async () => {
+ipcMain.handle('madara-stop', withErrorHandler(async () => {
   await Madara.stop();
-});
+}));
 
-ipcMain.handle('madara-delete', async () => {
+ipcMain.handle('madara-delete', withErrorHandler(async () => {
   await Madara.deleteNode();
-});
+}));
 
-ipcMain.handle('madara-setup', async (event, config: MadaraConfig) => {
+ipcMain.handle('madara-setup', withErrorHandler(async (event, config: MadaraConfig) => {
   await Madara.setup(mainWindow as BrowserWindow, config);
-});
+}));
 
-ipcMain.handle('release-exists', async (event, config: MadaraConfig) => {
+ipcMain.handle('release-exists', withErrorHandler(async (event, config: MadaraConfig) => {
   return Madara.releaseExists(config);
-});
+}));
 
-ipcMain.handle('send-tweet', async () => {
+ipcMain.handle('send-tweet', withErrorHandler(async () => {
   await Madara.getCurrentWindowScreenshot(mainWindow as BrowserWindow);
 
   const file = await Madara.fetchScreenshotFromSystem();
@@ -79,42 +88,43 @@ ipcMain.handle('send-tweet', async () => {
 
   // open link in browser
   shell.openExternal(TWEET_INTENT + shortenedLink);
-});
+}));
 
-ipcMain.handle('child-process-in-memory', (): boolean => {
+ipcMain.handle('child-process-in-memory', withErrorHandler(async (): Promise<boolean> => {
   return Madara.childProcessInMemory();
-});
+}));
 
-ipcMain.handle('madara-app-download', async (event, appId: string) => {
+ipcMain.handle('madara-app-download', withErrorHandler(async (event, appId: string) => {
   await MadaraApp.downloadApp(mainWindow as BrowserWindow, appId);
-});
+}));
 
-ipcMain.handle('madara-installed-apps', () => {
-  return MadaraApp.getInstalledApps();
-});
+ipcMain.handle('madara-installed-apps', withErrorHandler(async () => {
+  return Promise.resolve(MadaraApp.getInstalledApps());
+}));
 
-ipcMain.handle('madara-app-start', (event, appId: string) => {
-  return MadaraApp.startApp(mainWindow as BrowserWindow, appId);
-});
+ipcMain.handle('madara-app-start', withErrorHandler(async (event, appId: string) => {
+  return await MadaraApp.startApp(mainWindow as BrowserWindow, appId);
+}));
 
-ipcMain.handle('madara-app-stop', (event, appId: string) => {
+ipcMain.handle('madara-app-stop', withErrorHandler(async (event, appId: string) => {
   return MadaraApp.stopApp(mainWindow as BrowserWindow, appId);
-});
+}));
 
 ipcMain.handle(
   'madara-app-update-settings',
-  (event, appId: string, settings: any) => {
+  withErrorHandler(async (event, appId: string, settings: any) => {
     return MadaraApp.updateAppSettings(appId, settings);
-  }
+  })
 );
 
-ipcMain.handle('madara-app-get-settings', (event, appId: string) => {
+ipcMain.handle('madara-app-get-settings', withErrorHandler(async (event, appId: string) => {
   return MadaraApp.getAppSettings(appId);
-});
+}));
 
-ipcMain.handle('madara-fetch-all-running-apps', () => {
+ipcMain.handle('madara-fetch-all-running-apps', withErrorHandler(async () => {
   return MadaraApp.fetchAllRunningApps(mainWindow as BrowserWindow);
-});
+}));
+
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
