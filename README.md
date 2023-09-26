@@ -80,6 +80,7 @@ DEBUG=electron-osx-sign* CI=true npm run package
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/TedZy829"><img src="https://avatars.githubusercontent.com/u/102640890?v=4?s=100" width="100px;" alt="TedZy829"/><br /><sub><b>TedZy829</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/madara-tsukuyomi/commits?author=TedZy829" title="Code">💻</a></td>
        <td align="center" valign="top" width="14.28%"><a href="https://github.com/makluganteng"><img src="https://avatars.githubusercontent.com/u/74396818?v=4" width="100px;" alt="makluganteng"/><br /><sub><b>makluganteng</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/madara-tsukuyomi/commits?author=makluganteng" title="Code">💻</a></td>
+       <td align="center" valign="top" width="14.28%"><a href="https://github.com/0xGavinOwen"><img src="https://avatars.githubusercontent.com/u/110438299?v=4" width="100px;" alt="0xGavinOwen"/><br /><sub><b>0xGavinOwen</b></sub></a><br /><a href="https://github.com/keep-starknet-strange/madara-tsukuyomi/commits?author=0xGavinOwen" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
