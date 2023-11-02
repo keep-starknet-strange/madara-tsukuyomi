@@ -151,6 +151,21 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     throw Error('Node is already running!');
   }
 
+  // Check if release exists and setup
+  if (!await releaseExists(config)) {
+    await setup(window, config);
+  }
+
+  // Run the setup command for the node
+  const setupArgs = ['setup', '--chain', 'dev', '--from-local', './configs'];
+  const execPath = `${RELEASES_FOLDER}/${config.release}`;
+
+  if (process.platform !== 'win32') {
+    execSync(`chmod +x ${execPath}`);
+  }
+
+  execSync(`${execPath} ${setupArgs.join(' ')}`);
+
   const args = ['--base-path', CHAIN_DB_FOLDER];
   Object.keys(config).forEach((eachKey) => {
     // get value from node config input by user
@@ -183,11 +198,6 @@ export async function start(window: BrowserWindow, config: MadaraConfig) {
     }
   });
 
-  const execPath = `${RELEASES_FOLDER}/${config.release}`;
-  // if the os is linux or mac then get access to execPath
-  if (process.platform !== 'win32') {
-    execSync(`chmod +x ${execPath}`);
-  }
   childProcess = spawn(execPath, args);
 
   // BY DEFAULT SUBSTRATE LOGS TO STDERR SO WE USE THIS
